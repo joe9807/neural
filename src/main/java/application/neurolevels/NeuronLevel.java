@@ -47,11 +47,18 @@ public class NeuronLevel {
 
         final AtomicInteger number = new AtomicInteger();
         while (true) {
-            List<Double> weights = all.stream().filter(weight-> weight.getNeuron() == number.get()).map(Weight::getValue).collect(Collectors.toList());
+            List<Double> weights = all.stream().filter(weight-> weight.getNeuron() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList());
             if (weights.size() == 0) break;
-            neurons.add(new Neuron(number.getAndIncrement(), weights, level == 0?Collections.singletonList(Math.random()):input));
+            neurons.add(new Neuron(number.get(), weights, getInput(level, input, number.get())));
+            number.getAndIncrement();
         }
         return neurons;
+    }
+
+    private List<Double> getInput(int level, List<Double> input, int number){
+        if (input == null) return Collections.singletonList(Math.random());
+        if (level == 0) return Collections.singletonList(input.get(number));
+        return input;
     }
 
     public List<Double> calculate(int level, List<Double> input){

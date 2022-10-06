@@ -1,6 +1,8 @@
 package application;
 
 import application.neurolevels.NeuronLevel;
+import application.repository.WeightRepository;
+import application.repository.entity.Weight;
 import application.utils.Utils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,12 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import application.repository.WeightRepository;
-import application.repository.entity.Weight;
 
-import java.util.Collections;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RunWith(SpringRunner.class)
@@ -27,11 +29,44 @@ public class AITest {
     public NeuronLevel neuronLevel;
 
     @Test
-    public void testZeroLevel(){
+    public void test(){
+        //createWeights();
+
+        //Input Level
+        Date startDate = new Date();
+
+        //List<Double> afterInputLevel = neuronLevel.calculate(0, null);
+        List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
+        printLevel(afterInputLevel);
+        System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+
+        //Hidden Level
+        Date hiddenDate = new Date();
+
+        List<Double> afterHiddenLevel = neuronLevel.calculate(1, afterInputLevel);
+        //printLevel(afterHiddenLevel);
+        System.out.println("--------------- Hidden level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-hiddenDate.getTime()));
+
+        //Output Level
+        Date outputDate = new Date();
+
+        List<Double> outputLevel = neuronLevel.calculate(2, afterHiddenLevel);
+        printLevel(outputLevel);
+        System.out.println("--------------- Output level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-outputDate.getTime()));
+
+        System.out.println("--------------- Entire calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+    }
+
+    private void printLevel(List<Double> level){
+        for (int i=0;i<level.size();i++){
+            System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
+        }
+    }
+
+    private void createWeights(){
         Date startDate = new Date();
 
         //Input Level
-        Date inputDate = new Date();
         int inputCount = 20;
         IntStream.range(0, inputCount).forEach(number->{
             Weight weight = new Weight();
@@ -40,10 +75,6 @@ public class AITest {
             weight.setNeuron(number);
             weightRepository.save(weight);
         });
-
-        List<Double> afterInputLevel = neuronLevel.calculate(0, null);//just simple test value
-        printLevel(afterInputLevel);
-        System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-inputDate.getTime()));
 
         //Hidden Level
         Date hiddenDate = new Date();
@@ -56,12 +87,7 @@ public class AITest {
             weightRepository.save(weight);
         }));
 
-        List<Double> afterHiddenLevel = neuronLevel.calculate(1, afterInputLevel);
-        printLevel(afterHiddenLevel);
-        System.out.println("--------------- Hidden level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-hiddenDate.getTime()));
-
         //Output Level
-        Date outputDate = new Date();
         int outputCount = 1;
         IntStream.range(0, outputCount).forEach(number-> IntStream.range(0, hiddenCount).forEach(value->{
             Weight weight = new Weight();
@@ -71,16 +97,14 @@ public class AITest {
             weightRepository.save(weight);
         }));
 
-        List<Double> outputLevel = neuronLevel.calculate(2, afterHiddenLevel);
-        printLevel(outputLevel);
-        System.out.println("--------------- Output level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-outputDate.getTime()));
-
-        System.out.println("--------------- Entire calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+        System.out.println("--------------- Create weights took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
-    private void printLevel(List<Double> level){
-        for (int i=0;i<level.size();i++){
-            System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
+    private List<Double> loadInput() {
+        try {
+            return Files.readAllLines(Path.of(getClass().getResource("/input.txt").toURI())).stream().map(line -> Double.parseDouble(line.split(":")[1].trim())).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

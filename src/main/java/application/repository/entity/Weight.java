@@ -9,7 +9,7 @@ import javax.persistence.Id;
 
 @Data
 @Entity
-public class Weight {
+public class Weight implements Comparable<Weight>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -19,4 +19,9 @@ public class Weight {
     private int level;
 
     private int neuron;
+
+    @Override
+    public int compareTo(Weight o) {
+        return Integer.compare(o.neuron, neuron);
+    }
 }
