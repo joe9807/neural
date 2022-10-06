@@ -2,7 +2,7 @@ package application.neurolevels;
 
 import java.util.concurrent.Callable;
 
-public class NeuronWorker implements Callable<Double> {
+public class NeuronWorker implements Callable<Neuron> {
     private final Neuron neuron;
 
     public NeuronWorker(final Neuron neuron){
@@ -10,13 +10,14 @@ public class NeuronWorker implements Callable<Double> {
     }
 
     @Override
-    public Double call() {
+    public Neuron call() {
         int index = 0;
         double result = 0;
         while (index != neuron.getWeights().size() || index != neuron.getValues().size()) {
             result+=neuron.getWeights().get(index)*neuron.getValues().get(index);
             index++;
         }
-        return result;
+        neuron.setSum(result);
+        return neuron;
     }
 }

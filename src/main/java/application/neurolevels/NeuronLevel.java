@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -16,7 +15,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Component
 public class NeuronLevel {
@@ -78,13 +76,12 @@ public class NeuronLevel {
         } while (neurons.size() != 0 || executor.getTaskCount() != executor.getCompletedTaskCount());
 
 
-        return futures.stream().mapToDouble(future->{
+        return futures.stream().map(future->{
             try {
-                return (Double)future.get();
+                return (Neuron)future.get();
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-            return 0;
-        }).boxed().collect(Collectors.toList());
+        }).sorted().map(Neuron::getSum).collect(Collectors.toList());
     }
 }

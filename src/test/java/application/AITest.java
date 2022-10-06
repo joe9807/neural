@@ -37,14 +37,14 @@ public class AITest {
 
         //List<Double> afterInputLevel = neuronLevel.calculate(0, null);
         List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
-        printLevel(afterInputLevel);
+        //printLevel(afterInputLevel);
         System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
 
         //Hidden Level
         Date hiddenDate = new Date();
 
         List<Double> afterHiddenLevel = neuronLevel.calculate(1, afterInputLevel);
-        printLevel(afterHiddenLevel);
+        //printLevel(afterHiddenLevel);
         System.out.println("--------------- Hidden level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-hiddenDate.getTime()));
 
         //Output Level
@@ -78,7 +78,7 @@ public class AITest {
 
         //Hidden Level
         Date hiddenDate = new Date();
-        int hiddenCount = 2;
+        int hiddenCount = 100;
         IntStream.range(0, hiddenCount).forEach(number-> IntStream.range(0, inputCount).forEach(value->{
             Weight weight = new Weight();
             weight.setValue(Math.random());//random weight
