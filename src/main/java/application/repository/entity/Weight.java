@@ -18,10 +18,10 @@ public class Weight implements Comparable<Weight>{
 
     private int level;
 
-    private int neuron;
+    private int number;
 
     @Override
     public int compareTo(Weight o) {
-        return Integer.compare(o.neuron, neuron);
+        return Integer.compare(o.id, id);
     }
 }

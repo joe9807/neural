@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface WeightRepository extends CrudRepository<Weight, Integer> {
     @Query("from Weight w where w.level=:level order by id")
-    List<Weight> findAllByLevelAndNumber(@Param("level") int level);
+    List<Weight> findAllByLevel(@Param("level") int level);
 }

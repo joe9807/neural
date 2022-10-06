@@ -43,11 +43,11 @@ public class NeuronLevel {
 
     private List<Neuron> getNeurons(int level, List<Double> input) {
         List<Neuron> neurons = new ArrayList<>();
-        List<Weight> all = repository.findAllByLevelAndNumber(level);
+        List<Weight> all = repository.findAllByLevel(level);
 
         final AtomicInteger number = new AtomicInteger();
         while (true) {
-            List<Double> weights = all.stream().filter(weight-> weight.getNeuron() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList());
+            List<Double> weights = all.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList());
             if (weights.size() == 0) break;
             neurons.add(new Neuron(number.get(), weights, getInput(level, input, number.get())));
             number.getAndIncrement();
