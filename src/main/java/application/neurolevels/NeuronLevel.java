@@ -77,6 +77,6 @@ public class NeuronLevel {
 
         while (futures.size() != 0) futures.removeIf(Future::isDone);
 
-        return processed.stream().sorted().map(Neuron::getSum).collect(Collectors.toList());
+        return processed.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
     }
 }

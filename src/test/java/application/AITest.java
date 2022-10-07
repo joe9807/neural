@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,13 +31,14 @@ public class AITest {
 
     @Test
     public void test(){
-        recreateWeights();
+        //recreateWeights();
 
         //Input Level
         Date startDate = new Date();
 
-        List<Double> afterInputLevel = neuronLevel.calculate(0, null);
-        //List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
+        //List<Double> afterInputLevel = neuronLevel.calculate(0, null);
+        //saveInput(afterInputLevel);
+        List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
         //printLevel(afterInputLevel);
         System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
 
@@ -89,7 +91,15 @@ public class AITest {
 
     private List<Double> loadInput() {
         try {
-            return Files.readAllLines(Path.of(getClass().getResource("/input.txt").toURI())).stream().map(line -> Double.parseDouble(line.split(":")[1].trim())).collect(Collectors.toList());
+            return Files.readAllLines(Path.of(getClass().getResource("/input.txt").toURI())).stream().map(Double::valueOf).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveInput(List<Double> input) {
+        try {
+            Files.writeString(Path.of(getClass().getResource("/input.txt").toURI()), input.stream().map(String::valueOf).collect(Collectors.joining("\n")), StandardOpenOption.CREATE);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,7 @@
 package application.neurolevels;
 
 public class NeuronWorker implements Runnable {
+    private static final double B = 1/20.0;
     private final Neuron neuron;
 
     public NeuronWorker(final Neuron neuron){
@@ -17,10 +18,12 @@ public class NeuronWorker implements Runnable {
         }
         if (neuron.getLevel() != 0) {
             activate(v);
+        } else {
+            neuron.setOutput(v);
         }
     }
 
     private void activate(double v){
-        neuron.setSum(1/(1+Math.exp(-v)));
+        neuron.setOutput(1/(1+Math.exp(-B*v)));
     }
 }

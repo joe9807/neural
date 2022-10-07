@@ -10,7 +10,7 @@ public class Neuron implements Comparable<Neuron>{
     private List<Double> values;
     private int level;
     private int number;
-    private double sum;
+    private double output;
 
     public Neuron(int level, int number, List<Double> weights, List<Double> values){
         this.level = level;
