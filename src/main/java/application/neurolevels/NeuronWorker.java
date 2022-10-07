@@ -1,8 +1,6 @@
 package application.neurolevels;
 
-import java.util.concurrent.Callable;
-
-public class NeuronWorker implements Callable<Neuron> {
+public class NeuronWorker implements Runnable {
     private final Neuron neuron;
 
     public NeuronWorker(final Neuron neuron){
@@ -10,7 +8,7 @@ public class NeuronWorker implements Callable<Neuron> {
     }
 
     @Override
-    public Neuron call() {
+    public void run() {
         int index = 0;
         double result = 0;
         while (index != neuron.getWeights().size() || index != neuron.getValues().size()) {
@@ -18,6 +16,5 @@ public class NeuronWorker implements Callable<Neuron> {
             index++;
         }
         neuron.setSum(result);
-        return neuron;
     }
 }

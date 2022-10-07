@@ -61,7 +61,7 @@ public class NeuronLevel {
 
     public List<Double> calculate(int level, List<Double> input){
         final List<Neuron> neurons = getNeurons(level, input);
-        final List<Neuron> neuronsForRemove = new ArrayList<>();
+        final List<Neuron> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
 
         while (neurons.size() != 0 || executor.getActiveCount() != 0) {
@@ -69,19 +69,14 @@ public class NeuronLevel {
                 if (executor.getQueue().size() == CORE) continue;
 
                 futures.add(executor.submit(new NeuronWorker(neuron)));
-                neuronsForRemove.add(neuron);
+                processed.add(neuron);
             }
 
-            neurons.removeAll(neuronsForRemove);
+            neurons.removeAll(processed);
         }
 
+        while (futures.size() != 0) futures.removeIf(Future::isDone);
 
-        return futures.stream().map(future->{
-            try {
-                return (Neuron)future.get();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }).sorted().map(Neuron::getSum).collect(Collectors.toList());
+        return processed.stream().sorted().map(Neuron::getSum).collect(Collectors.toList());
     }
 }
