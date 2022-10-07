@@ -22,7 +22,7 @@ public class NeuronLevel {
     private final ThreadPoolExecutor executor;
 
     @Autowired
-    private WeightRepository repository;
+    private WeightRepository weightRepository;
 
     public NeuronLevel(){
         executor = new ThreadPoolExecutor(CORE, CORE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(CORE), getThreadFactory());
@@ -41,12 +41,11 @@ public class NeuronLevel {
 
     private List<Neuron> getNeurons(int level, List<Double> input) {
         List<Neuron> neurons = new ArrayList<>();
-        List<Weight> all = repository.findAllByLevel(level);
+        List<Weight> all = weightRepository.findAllByLevel(level);
 
         final AtomicInteger number = new AtomicInteger();
-        while (true) {
-            List<Double> weights = all.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList());
-            if (weights.size() == 0) break;
+        List<Double> weights;
+        while ((weights = all.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList())).size() !=0) {
             neurons.add(new Neuron(level, number.get(), weights, getInput(level, input, number.get())));
             number.getAndIncrement();
         }
@@ -64,7 +63,7 @@ public class NeuronLevel {
         final List<Neuron> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
 
-        while (neurons.size() != 0 || executor.getActiveCount() != 0) {
+        while (neurons.size() != 0) {
             for (Neuron neuron : neurons) {
                 if (executor.getQueue().size() == CORE) continue;
 
