@@ -30,13 +30,13 @@ public class AITest {
 
     @Test
     public void test(){
-        //createWeights();
+        recreateWeights();
 
         //Input Level
         Date startDate = new Date();
 
-        //List<Double> afterInputLevel = neuronLevel.calculate(0, null);
-        List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
+        List<Double> afterInputLevel = neuronLevel.calculate(0, null);
+        //List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
         //printLevel(afterInputLevel);
         System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
 
@@ -63,8 +63,10 @@ public class AITest {
         }
     }
 
-    private void createWeights(){
+    private void recreateWeights(){
         Date startDate = new Date();
+
+        weightRepository.deleteAll();
 
         //Input Level
         int inputCount = 20;

@@ -47,7 +47,7 @@ public class NeuronLevel {
         while (true) {
             List<Double> weights = all.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList());
             if (weights.size() == 0) break;
-            neurons.add(new Neuron(number.get(), weights, getInput(level, input, number.get())));
+            neurons.add(new Neuron(level, number.get(), weights, getInput(level, input, number.get())));
             number.getAndIncrement();
         }
         return neurons;
@@ -77,6 +77,7 @@ public class NeuronLevel {
 
         while (futures.size() != 0) futures.removeIf(Future::isDone);
 
+        //processed.forEach(System.out::println);
         return processed.stream().sorted().map(Neuron::getSum).collect(Collectors.toList());
     }
 }

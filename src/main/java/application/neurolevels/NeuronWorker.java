@@ -10,11 +10,17 @@ public class NeuronWorker implements Runnable {
     @Override
     public void run() {
         int index = 0;
-        double result = 0;
+        double v = 0;
         while (index != neuron.getWeights().size() || index != neuron.getValues().size()) {
-            result+=neuron.getWeights().get(index)*neuron.getValues().get(index);
+            v+=neuron.getWeights().get(index)*neuron.getValues().get(index);
             index++;
         }
-        neuron.setSum(result);
+        if (neuron.getLevel() != 0) {
+            activate(v);
+        }
+    }
+
+    private void activate(double v){
+        neuron.setSum(1/(1+Math.exp(-v)));
     }
 }
