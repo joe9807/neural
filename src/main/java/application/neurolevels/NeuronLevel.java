@@ -73,7 +73,7 @@ public class NeuronLevel {
             }
 
             neurons.removeAll(neuronsForRemove);
-        } while (neurons.size() != 0 || executor.getTaskCount() != executor.getCompletedTaskCount());
+        } while (neurons.size() != 0 || executor.getActiveCount() != 0);
 
 
         return futures.stream().map(future->{

@@ -77,7 +77,6 @@ public class AITest {
         });
 
         //Hidden Level
-        Date hiddenDate = new Date();
         int hiddenCount = 100;
         IntStream.range(0, hiddenCount).forEach(number-> IntStream.range(0, inputCount).forEach(value->{
             Weight weight = new Weight();
