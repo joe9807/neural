@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +84,7 @@ public class AITest {
             weightRepository.saveAll(IntStream.range(0, hiddenCount).mapToObj(value-> new Weight(2, number, Math.random())).collect(Collectors.toList()));
         });
 
-        System.out.println("--------------- Create weights took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+        System.out.println("=========== Create weights took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime())+" ===================");
     }
 
     private List<Double> loadInput() {
