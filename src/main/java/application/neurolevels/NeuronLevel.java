@@ -64,7 +64,7 @@ public class NeuronLevel {
         final List<Neuron> neuronsForRemove = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
 
-        do {
+        while (neurons.size() != 0 || executor.getActiveCount() != 0) {
             for (Neuron neuron : neurons) {
                 if (executor.getQueue().size() == CORE) continue;
 
@@ -73,7 +73,7 @@ public class NeuronLevel {
             }
 
             neurons.removeAll(neuronsForRemove);
-        } while (neurons.size() != 0 || executor.getActiveCount() != 0);
+        }
 
 
         return futures.stream().map(future->{

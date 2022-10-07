@@ -6,9 +6,9 @@ import java.util.List;
 
 @Data
 public class Neuron implements Comparable<Neuron>{
-    private int number;
     private List<Double> weights;
     private List<Double> values;
+    private int number;
     private double sum;
 
     public Neuron(int number, List<Double> weights, List<Double> values){
