@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Future;
@@ -29,12 +28,12 @@ public class NeuronLevel {
 
     private List<Neuron> getNeurons(int level, List<Double> input) {
         List<Neuron> neurons = new ArrayList<>();
-        List<Weight> all = weightRepository.findAllByLevel(level);
+        List<Weight> allWeights = weightRepository.findAllByLevel(level);
 
         final AtomicInteger number = new AtomicInteger();
-        List<Double> weights;
-        while ((weights = all.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList())).size() !=0) {
-            neurons.add(new Neuron(level, number.getAndIncrement(), weights, input));
+        List<Double> neuronWeights;
+        while ((neuronWeights = allWeights.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList())).size() !=0) {
+            neurons.add(new Neuron(level, number.getAndIncrement(), neuronWeights, input));
         }
         return neurons;
     }
