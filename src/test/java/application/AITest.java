@@ -36,9 +36,9 @@ public class AITest {
         //Input Level
         Date startDate = new Date();
 
-        //List<Double> afterInputLevel = neuronLevel.calculate(0, null);
-        //saveInput(afterInputLevel);
-        List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
+        List<Double> afterInputLevel = neuronLevel.calculate(0, generateInput());
+        saveInput(afterInputLevel);
+        //List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
         //printLevel(afterInputLevel);
         System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
 
@@ -87,6 +87,10 @@ public class AITest {
         });
 
         System.out.println("=========== Create weights took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime())+" ===================");
+    }
+
+    private List<Double> generateInput() {
+        return IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList());
     }
 
     private List<Double> loadInput() {

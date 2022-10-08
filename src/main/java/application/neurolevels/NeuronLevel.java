@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,18 +24,7 @@ public class NeuronLevel {
     private WeightRepository weightRepository;
 
     public NeuronLevel(){
-        executor = new ThreadPoolExecutor(CORE, CORE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(CORE), getThreadFactory());
-    }
-
-    private ThreadFactory getThreadFactory(){
-        return new ThreadFactory(){
-            private final AtomicInteger count = new AtomicInteger();
-
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, String.valueOf(count.getAndIncrement()));
-            }
-        };
+        executor = new ThreadPoolExecutor(CORE, CORE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(CORE));
     }
 
     private List<Neuron> getNeurons(int level, List<Double> input) {
@@ -46,16 +34,9 @@ public class NeuronLevel {
         final AtomicInteger number = new AtomicInteger();
         List<Double> weights;
         while ((weights = all.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList())).size() !=0) {
-            neurons.add(new Neuron(level, number.get(), weights, getInput(level, input, number.get())));
-            number.getAndIncrement();
+            neurons.add(new Neuron(level, number.getAndIncrement(), weights, input));
         }
         return neurons;
-    }
-
-    private List<Double> getInput(int level, List<Double> input, int number){
-        if (input == null) return Collections.singletonList(Math.random());
-        if (level == 0) return Collections.singletonList(input.get(number));
-        return input;
     }
 
     public List<Double> calculate(int level, List<Double> input){
