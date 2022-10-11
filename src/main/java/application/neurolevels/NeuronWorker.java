@@ -16,14 +16,11 @@ public class NeuronWorker implements Runnable {
             v+=neuron.getWeights().get(index)*neuron.getInput().get(index);
             index++;
         }
-        if (neuron.getLevel() != 0) {
-            activate(v);
-        } else {
-            neuron.setOutput(v);
-        }
+        neuron.setOutput(activate(v));
     }
 
-    private void activate(double v){
-        neuron.setOutput(1/(1+Math.exp(-B*v)));
+    private double activate(double v){
+        if (neuron.getLevel() == 0) return v;
+        return 1/(1+Math.exp(-B*v));
     }
 }
