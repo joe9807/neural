@@ -1,5 +1,6 @@
 package application.ui;
 
+import application.neural.NeuralNetwork;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -15,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.IntStream;
 
@@ -26,6 +28,9 @@ public class NeuralUI {
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String FILE_NAME = "text.png";
+
+    @Autowired
+    private NeuralNetwork neuralNetwork;
 
     public static void main(String[] args){
         shell = new Shell(new Display(), SWT.CLOSE);
@@ -51,7 +56,7 @@ public class NeuralUI {
         runTestItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-
+                neuralNetwork.recreateWeights();
             }
 
             @Override
