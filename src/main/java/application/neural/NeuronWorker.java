@@ -1,4 +1,4 @@
-package application.neurolevels;
+package application.neural;
 
 public class NeuronWorker implements Runnable {
     private static final double B = 1/20.0;

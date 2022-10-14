@@ -1,6 +1,8 @@
 package application.ui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -10,6 +12,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 import java.util.stream.IntStream;
@@ -38,6 +42,26 @@ public class NeuralUI {
                 shell.getDisplay().sleep();
             }
         }
+    }
+
+    private void setMenu(){
+        Menu menu = new Menu(shell, SWT.NONE);
+        MenuItem runTestItem = new MenuItem(menu, SWT.NONE);
+        runTestItem.setText("Run Test");
+        runTestItem.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {}
+        });
+        shell.setMenu(menu);
+    }
+
+    public void runTest(){
+
     }
 
     private static void drawImage(GC gc){

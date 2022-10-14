@@ -1,6 +1,6 @@
 package application;
 
-import application.neurolevels.NeuronLevel;
+import application.neural.NeuronLevel;
 import application.repository.WeightRepository;
 import application.repository.entity.Weight;
 import application.utils.Utils;
@@ -31,7 +31,7 @@ public class AITest {
 
     @Test
     public void test(){
-        //recreateWeights();
+        recreateWeights();
 
         //Input Level
         Date startDate = new Date();

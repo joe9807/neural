@@ -1,4 +1,4 @@
-package application.neurolevels;
+package application.neural;
 
 import lombok.Data;
 
