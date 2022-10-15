@@ -69,7 +69,7 @@ public class NeuralUI {
     }
 
     public void runTest(){
-        neuralNetwork.recreateWeights();
+        neuralNetwork.recreate();
     }
 
     private void drawImage(GC gc){

@@ -3,7 +3,6 @@ package application;
 import application.neural.NeuralNetwork;
 import application.neural.NeuronLevel;
 import application.repository.WeightRepository;
-import application.repository.entity.Weight;
 import application.utils.Utils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,22 +34,19 @@ public class AITest {
 
     @Test
     public void test(){
-        neuralNetwork.recreateWeights();
+        neuralNetwork.recreate(20, 100, 1);
 
         //Input Level
         Date startDate = new Date();
 
         List<Double> afterInputLevel = neuronLevel.calculate(0, generateInput());
         saveInput(afterInputLevel);
-        //List<Double> afterInputLevel = neuronLevel.calculate(0, loadInput());
-        //printLevel(afterInputLevel);
         System.out.println("--------------- Input level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
 
         //Hidden Level
         Date hiddenDate = new Date();
 
         List<Double> afterHiddenLevel = neuronLevel.calculate(1, afterInputLevel);
-        //printLevel(afterHiddenLevel);
         System.out.println("--------------- Hidden level calculation took: "+Utils.getTimeElapsed(new Date().getTime()-hiddenDate.getTime()));
 
         //Output Level
