@@ -38,6 +38,7 @@ public class NeuralUI {
 
     private Shell shell;
     private Image image;
+    private Label middleLabel;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
@@ -49,6 +50,7 @@ public class NeuralUI {
         shell.setSize(new Point(WIDTH*3, HEIGHT+50));
 
         Label label = new Label(shell, SWT.BORDER);
+        middleLabel = new Label(shell, SWT.BORDER);
         drawImage(label);
 
         setMenu(label);
@@ -79,8 +81,11 @@ public class NeuralUI {
     public void runTest(){
         neuralNetwork.recreate(216, 20, 20, 52);
 
+        Display.getCurrent().asyncExec(this::calculate);
+    }
+
+    private void calculate(){
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
-        Label middleLabel = new Label(shell, SWT.BORDER);
 
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
             List<Double> input = new ArrayList<>();
@@ -96,8 +101,6 @@ public class NeuralUI {
             middleLabel.setImage(new Image(shell.getDisplay(), imageData));
             shell.layout();
         });
-//        middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-//        shell.layout();
     }
 
     private void drawImage(Label label){
