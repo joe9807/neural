@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,6 +18,9 @@ import java.util.stream.IntStream;
 public class NeuralNetwork {
     @Autowired
     private WeightRepository weightRepository;
+
+    @Autowired
+    public NeuronLevel neuronLevel;
 
     public void recreate(int... neuronsCount){
         Date startDate = new Date();
@@ -37,6 +42,21 @@ public class NeuralNetwork {
             levelNumber.incrementAndGet();
         });
 
-        System.out.println("=========== Create weights took: "+ Utils.getTimeElapsed(new Date().getTime()-startDate.getTime())+" ===================");
+        System.out.printf("=============== Recreate weights took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+    }
+
+    public List<Double> calculate(){
+        AtomicReference<List<Double>> result = new AtomicReference<>();
+        IntStream.range(0, weightRepository.findLevelsCount()).forEach(levelNumber->{
+            Date startDate = new Date();
+            result.set(neuronLevel.calculate(levelNumber, result.get() == null?generateInput():result.get()));
+            System.out. printf("--------------- '%s' level calculation took: %s\n", levelNumber, Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+        });
+
+        return result.get();
+    }
+
+    private List<Double> generateInput() {
+        return IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList());
     }
 }
