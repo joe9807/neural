@@ -17,9 +17,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.stream.IntStream;
 
+@Service
 public class NeuralUI {
     private static final int WIDTH = 26*13;
     private static final int HEIGHT = 400;
@@ -32,7 +34,7 @@ public class NeuralUI {
     @Autowired
     private NeuralNetwork neuralNetwork;
 
-    public static void main(String[] args){
+    public void init(){
         shell = new Shell(new Display(), SWT.CLOSE);
         shell.setLayout(new FillLayout());
         shell.setText("Neural UI");
@@ -41,6 +43,7 @@ public class NeuralUI {
         Canvas canvas = new Canvas(shell, SWT.NONE);
         canvas.addListener(SWT.Paint, e -> drawImage(e.gc));
 
+        setMenu(canvas);
         shell.open();
         while (!shell.isDisposed()) {
             if (!shell.getDisplay().readAndDispatch()) {
@@ -49,27 +52,27 @@ public class NeuralUI {
         }
     }
 
-    private void setMenu(){
+    private void setMenu(Canvas canvas){
         Menu menu = new Menu(shell, SWT.NONE);
         MenuItem runTestItem = new MenuItem(menu, SWT.NONE);
         runTestItem.setText("Run Test");
         runTestItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                neuralNetwork.recreateWeights();
+                runTest();
             }
 
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
-        shell.setMenu(menu);
+        canvas.setMenu(menu);
     }
 
     public void runTest(){
-
+        neuralNetwork.recreateWeights();
     }
 
-    private static void drawImage(GC gc){
+    private void drawImage(GC gc){
         Image image = new Image(shell.getDisplay(), WIDTH, HEIGHT);
         Font font = new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL);
         GC gcImage = new GC(image);
@@ -85,7 +88,7 @@ public class NeuralUI {
         saver.save(FILE_NAME, SWT.IMAGE_PNG);
     }
 
-    private static void drawRect(GC gc){
+    private void drawRect(GC gc){
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> gc.drawRectangle(index*12+3, 3, 12, FONT_SIZE));
         IntStream.range(0, ALPHABET_LOWER_CASE.length()).forEach(index-> gc.drawRectangle(index*12+3, FONT_SIZE+3, 12, FONT_SIZE+3));
     }
