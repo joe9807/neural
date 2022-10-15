@@ -6,6 +6,9 @@ import application.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -50,13 +53,32 @@ public class NeuralNetwork {
         IntStream.range(0, weightRepository.findLevelsCount()).forEach(levelNumber->{
             Date startDate = new Date();
             result.set(neuronLevel.calculate(levelNumber, result.get() == null?generateInput():result.get()));
-            System.out. printf("--------------- '%s' level calculation took: %s\n", levelNumber, Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+            System.out.printf("--------------- '%s' level calculation took: %s\n", levelNumber, Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
         });
 
         return result.get();
     }
 
     private List<Double> generateInput() {
-        return IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList());
+        //return loadInput();
+        return saveInput(IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList()));
+    }
+
+    private List<Double> saveInput(List<Double> input) {
+        try {
+            Files.writeString(Path.of(getClass().getResource("/input.txt").toURI()), input.stream().map(String::valueOf).collect(Collectors.joining("\n")), StandardOpenOption.CREATE);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return input;
+    }
+
+    private List<Double> loadInput() {
+        try {
+            return Files.readAllLines(Path.of(getClass().getResource("/input.txt").toURI())).stream().map(Double::valueOf).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
