@@ -1,6 +1,7 @@
 package application.ui;
 
 import application.neural.NeuralNetwork;
+import application.utils.Utils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -21,6 +22,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 @Service
@@ -30,6 +33,7 @@ public class NeuralUI {
     private static final int FONT_SIZE = 15;
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
+    private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
     private static final String FILE_NAME = "text.png";
 
     private Shell shell;
@@ -73,22 +77,27 @@ public class NeuralUI {
     }
 
     public void runTest(){
-        neuralNetwork.recreate();
+        neuralNetwork.recreate(216, 20, 20, 52);
 
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         Label middleLabel = new Label(shell, SWT.BORDER);
 
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
+            List<Double> input = new ArrayList<>();
             IntStream.range(0, 12).forEach(x->{
                 IntStream.range(0, FONT_SIZE + 3).forEach(y->{
                     int pixelValue = image.getImageData().getPixel(index * 12+x, y);
                     imageData.setPixel(index * 12+x, y, pixelValue);
-                    System.out.println(pixelValue);
+                    input.add((double) pixelValue);
                 });
             });
+
+            Utils.printLevel(neuralNetwork.calculate(input));
+            middleLabel.setImage(new Image(shell.getDisplay(), imageData));
+            shell.layout();
         });
-        middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-        shell.layout();
+//        middleLabel.setImage(new Image(shell.getDisplay(), imageData));
+//        shell.layout();
     }
 
     private void drawImage(Label label){

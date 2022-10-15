@@ -48,11 +48,11 @@ public class NeuralNetwork {
         System.out.printf("=============== Recreate weights took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
-    public List<Double> calculate(){
+    public List<Double> calculate(List<Double> input){
         AtomicReference<List<Double>> result = new AtomicReference<>();
         IntStream.range(0, weightRepository.findLevelsCount()).forEach(levelNumber->{
             Date startDate = new Date();
-            result.set(neuronLevel.calculate(levelNumber, result.get() == null?generateInput():result.get()));
+            result.set(neuronLevel.calculate(levelNumber, result.get() == null?(input == null?generateInput():input):result.get()));
             System.out.printf("--------------- '%s' level calculation took: %s\n", levelNumber, Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
         });
 

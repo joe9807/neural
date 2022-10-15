@@ -1,5 +1,7 @@
 package application.utils;
 
+import java.util.List;
+
 public class Utils {
     public static String getTimeElapsed(long elapsed) {
         long milliseconds = elapsed % 1000;
@@ -36,5 +38,11 @@ public class Utils {
                 .append(millisStr).toString();
 
         return result.isEmpty()?"0 ms":result;
+    }
+
+    public static void printLevel(List<Double> level){
+        for (int i=0;i<level.size();i++){
+            System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
+        }
     }
 }

@@ -2,14 +2,13 @@ package application;
 
 import application.neural.NeuralNetwork;
 import application.repository.WeightRepository;
+import application.utils.Utils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -23,13 +22,8 @@ public class AITest {
 
     @Test
     public void test(){
-        neuralNetwork.recreate(20, 100, 1);
-        printLevel(neuralNetwork.calculate());
+        neuralNetwork.recreate(216, 20, 20, 52);
+        Utils.printLevel(neuralNetwork.calculate(null));
     }
 
-    private void printLevel(List<Double> level){
-        for (int i=0;i<level.size();i++){
-            System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
-        }
-    }
 }
