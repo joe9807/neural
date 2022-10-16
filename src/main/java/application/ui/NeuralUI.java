@@ -13,12 +13,14 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,20 +42,21 @@ public class NeuralUI {
     private Shell shell;
     private Image image;
     private Label middleLabel;
-    private Label rightLabel;
+    private Text text;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
 
     public void init(){
-        shell = new Shell(new Display(), SWT.CLOSE | SWT.RESIZE);
+        shell = new Shell(new Display(), SWT.CLOSE);
         shell.setLayout(new RowLayout());
         shell.setText("Neural UI");
-        shell.setSize(new Point(WIDTH*3, HEIGHT+50));
+        shell.setSize(new Point(WIDTH*3+45, HEIGHT+50));
 
         Label leftLabel = new Label(shell, SWT.BORDER);
         middleLabel = new Label(shell, SWT.BORDER);
-        rightLabel = new Label(shell, SWT.NONE);
+        text = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
+        text.setLayoutData(new RowData(WIDTH, HEIGHT));
         drawImage(leftLabel);
 
         setMenu(leftLabel);
@@ -107,7 +110,7 @@ public class NeuralUI {
         });
 
         middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-        rightLabel.setText(scan.get());
+        text.setText(scan.get());
         shell.layout();
     }
 
