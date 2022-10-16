@@ -95,16 +95,7 @@ public class NeuralUI {
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-            List<Double> input = new ArrayList<>();
-            IntStream.range(0, 12).forEach(x->{
-                IntStream.range(0, FONT_SIZE + 3).forEach(y->{
-                    int pixelValue = image.getImageData().getPixel(index * 12+x, y);
-                    imageData.setPixel(index * 12+x, y, pixelValue);
-                    input.add((double) pixelValue);
-                });
-            });
-
-            List<Double> result = neuralNetwork.calculate(input);
+            List<Double> result = neuralNetwork.calculate(getInput(imageData, index));
             String ch = ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt())+StringUtils.EMPTY;
             scan.set(scan.get()+ch);
         });
@@ -112,6 +103,19 @@ public class NeuralUI {
         middleLabel.setImage(new Image(shell.getDisplay(), imageData));
         text.setText(scan.get());
         shell.layout();
+    }
+
+    private List<Double> getInput(ImageData imageData, int index){
+        List<Double> input = new ArrayList<>();
+        IntStream.range(0, 12).forEach(x->{
+            IntStream.range(0, FONT_SIZE + 3).forEach(y->{
+                int pixelValue = image.getImageData().getPixel(index * 12+x, y);
+                imageData.setPixel(index * 12+x, y, pixelValue);
+                input.add((double) pixelValue);
+            });
+        });
+
+        return input;
     }
 
     private void drawImage(Label label){
