@@ -1,7 +1,7 @@
 package application.ui;
 
 import application.neural.NeuralNetwork;
-import application.utils.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 @Service
@@ -39,6 +40,7 @@ public class NeuralUI {
     private Shell shell;
     private Image image;
     private Label middleLabel;
+    private Label rightLabel;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
@@ -49,11 +51,12 @@ public class NeuralUI {
         shell.setText("Neural UI");
         shell.setSize(new Point(WIDTH*3, HEIGHT+50));
 
-        Label label = new Label(shell, SWT.BORDER);
+        Label leftLabel = new Label(shell, SWT.BORDER);
         middleLabel = new Label(shell, SWT.BORDER);
-        drawImage(label);
+        rightLabel = new Label(shell, SWT.NONE);
+        drawImage(leftLabel);
 
-        setMenu(label);
+        setMenu(leftLabel);
         shell.open();
         while (!shell.isDisposed()) {
             if (!shell.getDisplay().readAndDispatch()) {
@@ -79,7 +82,7 @@ public class NeuralUI {
     }
 
     public void runTest(){
-        neuralNetwork.recreate(216, 20, 20, 52);
+        neuralNetwork.recreate(216, 20, 26);
 
         Display.getCurrent().asyncExec(this::calculate);
     }
@@ -87,6 +90,7 @@ public class NeuralUI {
     private void calculate(){
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
 
+        final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
             List<Double> input = new ArrayList<>();
             IntStream.range(0, 12).forEach(x->{
@@ -97,10 +101,14 @@ public class NeuralUI {
                 });
             });
 
-            Utils.printLevel(neuralNetwork.calculate(input));
-            middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-            shell.layout();
+            List<Double> result = neuralNetwork.calculate(input);
+            String ch = ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt())+StringUtils.EMPTY;
+            scan.set(scan.get()+ch);
         });
+
+        middleLabel.setImage(new Image(shell.getDisplay(), imageData));
+        rightLabel.setText(scan.get());
+        shell.layout();
     }
 
     private void drawImage(Label label){
