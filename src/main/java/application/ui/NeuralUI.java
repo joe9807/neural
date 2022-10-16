@@ -126,17 +126,11 @@ public class NeuralUI {
         gcImage.setFont(font);
         gcImage.drawString(ALPHABET_UPPER_CASE, 0, 0);
         gcImage.drawString(ALPHABET_LOWER_CASE, 0, FONT_SIZE +1);
-        //drawRect(gcImage);
 
         label.setImage(image);
 
         ImageLoader saver = new ImageLoader();
         saver.data = new ImageData[] { image.getImageData() };
         saver.save(FILE_NAME, SWT.IMAGE_PNG);
-    }
-
-    private void drawRect(GC gc){
-        IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> gc.drawRectangle(index*12, 0, 12, FONT_SIZE+3));
-        IntStream.range(0, ALPHABET_LOWER_CASE.length()).forEach(index-> gc.drawRectangle(index*12, FONT_SIZE+3, 12, FONT_SIZE+3));
     }
 }
