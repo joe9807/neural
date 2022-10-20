@@ -3,5 +3,5 @@ CREATE TABLE if not exists weight(
   value real,
   level smallint,
   number smallint,
-  pos smallint
+  backNumber smallint
 );

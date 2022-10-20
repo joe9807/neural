@@ -21,9 +21,8 @@ public class NeuronBackLevel extends NeuronLevel{
         List<Weight> allWeights = weightRepository.findAllByLevel(level);
 
         final AtomicInteger number = new AtomicInteger();
-        IntStream.range(0, input.size()).forEach(pos->{
-            neurons.add(new NeuronBack(level-1, number.get(), allWeights.stream().filter(weight-> weight.getPos() == pos).sorted().map(Weight::getValue).collect(Collectors.toList()), input, delta));
-            number.getAndIncrement();
+        IntStream.range(0, input.size()).forEach(backNumber->{
+            neurons.add(new NeuronBack(level-1, number.getAndIncrement(), allWeights.stream().filter(weight-> weight.getBackNumber() == backNumber).sorted().map(Weight::getValue).collect(Collectors.toList()), input, delta));
         });
 
         return neurons;

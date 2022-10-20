@@ -20,15 +20,15 @@ public class Weight implements Comparable<Weight>{
 
     private int number;
 
-    private int pos;
+    private int backNumber;
 
     private double value;
 
-    public Weight(final int level, final int number, final double value, int pos){
+    public Weight(final int level, final int number, final double value, int backNumber){
         this.level = level;
         this.number = number;
         this.value = value;
-        this.pos = pos;
+        this.backNumber = backNumber;
     }
 
     @Override
