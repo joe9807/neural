@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class NeuronLevel {
+    private final ForkJoinPool executor = new ForkJoinPool(20);
+
     @Autowired
     private WeightRepository weightRepository;
 
@@ -30,8 +32,6 @@ public class NeuronLevel {
     }
 
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
-        ForkJoinPool executor = new ForkJoinPool(20);
-
         final List<Neuron> neurons = getNeurons(level, input, delta);
         final List<Neuron> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
