@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -24,6 +24,9 @@ public class NeuralNetwork {
 
     @Autowired
     public NeuronLevel neuronLevel;
+
+    @Autowired
+    public NeuronBackLevel neuronBackLevel;
 
     public void recreate(int... neuronsCount){
         Date startDate = new Date();
@@ -36,7 +39,7 @@ public class NeuralNetwork {
             if (prevCount.get() == 0) {//input level is here
                 weightRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number-> new Weight(levelNumber.get(), number, 1.0)).collect(Collectors.toList()));
             } else {//hidden and output levels are here
-                IntStream.range(0, neuronCount).forEach(number-> weightRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(value-> new Weight(levelNumber.get(), number, Math.random()))
+                IntStream.range(0, neuronCount).forEach(number-> weightRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(value-> new Weight(levelNumber.get(), number, Math.random()-0.5))
                         .collect(Collectors.toList())));
             }
 
@@ -47,16 +50,19 @@ public class NeuralNetwork {
         System.out.printf("=============== Recreate weights took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
-    public List<Double> calculate(List<Double> input){
-        AtomicReference<List<Double>> result = new AtomicReference<>();
-        IntStream.range(0, weightRepository.findLevelsCount()).forEach(levelNumber->{
-            Date startDate = new Date();
-            result.set(neuronLevel.calculate(levelNumber, result.get() == null?(input == null?generateInput():input):result.get()));
-            int maxIndex = IntStream.range(0, result.get().size()).reduce((i, j) -> result.get().get(i) > result.get().get(j) ? i : j).getAsInt();
-            System.out.printf("------- best neuron: %s -------- '%s' level calculation took: %s\n", maxIndex, levelNumber, Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-        });
-        System.out.printf("%n");
-        return result.get();
+    public List<List<Double>> calculate(List<Double> input, List<Double> delta){
+        List<List<Double>> outputs = new ArrayList<>();
+        for (int levelNumber=0;levelNumber<weightRepository.findLevelsCount();levelNumber++){
+            outputs.add(neuronLevel.calculate(levelNumber, outputs.isEmpty()?(input == null?generateInput():input):outputs.get(outputs.size()-1), null));
+        }
+
+        List<List<Double>> deltas = new ArrayList<>();
+        if (delta != null) {
+            for (int levelNumber=outputs.size();levelNumber>1;levelNumber--){
+                deltas.add(neuronBackLevel.calculate(levelNumber, outputs.get(levelNumber-1), deltas.isEmpty()?delta:deltas.get(deltas.size()-1)));
+            }
+        }
+        return delta == null?outputs:deltas;
     }
 
     private List<Double> generateInput() {

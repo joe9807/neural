@@ -1,11 +1,13 @@
 package application.neural;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class Neuron implements Comparable<Neuron>{
     private List<Double> weights;
     private List<Double> input;
@@ -22,6 +24,10 @@ public class Neuron implements Comparable<Neuron>{
 
     @Override
     public int compareTo(Neuron o) {
-        return Integer.compare(o.number, number);
+        return Integer.compare(number, o.number);
+    }
+
+    public Runnable getWorker(){
+        return new NeuronWorker(this);
     }
 }

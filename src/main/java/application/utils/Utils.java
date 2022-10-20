@@ -41,6 +41,8 @@ public class Utils {
     }
 
     public static void printLevel(List<Double> level){
+        if (level == null) return;
+
         for (int i=0;i<level.size();i++){
             System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
         }

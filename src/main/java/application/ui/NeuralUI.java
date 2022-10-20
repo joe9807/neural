@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -70,12 +71,24 @@ public class NeuralUI {
 
     private void setMenu(Label label){
         Menu menu = new Menu(shell, SWT.NONE);
+        MenuItem learningItem = new MenuItem(menu, SWT.NONE);
+        learningItem.setText("Learn AI");
+        learningItem.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                learn();
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {}
+        });
+
         MenuItem runTestItem = new MenuItem(menu, SWT.NONE);
-        runTestItem.setText("Run Test");
+        runTestItem.setText("Run AI");
         runTestItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                runTest();
+                run();
             }
 
             @Override
@@ -84,18 +97,22 @@ public class NeuralUI {
         label.setMenu(menu);
     }
 
-    public void runTest(){
+    public void learn(){
         neuralNetwork.recreate(216, 20, 26);
-
-        Display.getCurrent().asyncExec(this::calculate);
+        IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
+            List<Double> delta = IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0).collect(Collectors.toList());
+            neuralNetwork.calculate(getInput(null, index), delta);
+        });
     }
 
-    private void calculate(){
+    public void run(){
+        neuralNetwork.recreate(216, 20, 26);
+
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-            List<Double> result = neuralNetwork.calculate(getInput(imageData, index));
+            List<Double> result = neuralNetwork.calculate(getInput(imageData, index), null).stream().reduce((first, second) -> second).orElse(null);
             String ch = ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt())+StringUtils.EMPTY;
             scan.set(scan.get()+ch);
         });
@@ -110,7 +127,9 @@ public class NeuralUI {
         IntStream.range(0, 12).forEach(x->{
             IntStream.range(0, FONT_SIZE + 3).forEach(y->{
                 int pixelValue = image.getImageData().getPixel(index * 12+x, y);
-                imageData.setPixel(index * 12+x, y, pixelValue);
+                if (imageData != null) {
+                    imageData.setPixel(index * 12+x, y, pixelValue);
+                }
                 input.add((double) pixelValue);
             });
         });
