@@ -37,9 +37,9 @@ public class NeuralNetwork {
         final AtomicInteger levelNumber = new AtomicInteger(0);
         Arrays.stream(neuronsCount).forEach(neuronCount->{
             if (prevCount.get() == 0) {//input level is here
-                weightRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number-> new Weight(levelNumber.get(), number, 1.0)).collect(Collectors.toList()));
+                weightRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number-> new Weight(levelNumber.get(), number, 1.0, 0)).collect(Collectors.toList()));
             } else {//hidden and output levels are here
-                IntStream.range(0, neuronCount).forEach(number-> weightRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(value-> new Weight(levelNumber.get(), number, Math.random()-0.5))
+                IntStream.range(0, neuronCount).forEach(number-> weightRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(pos-> new Weight(levelNumber.get(), number, Math.random()-0.5, pos))
                         .collect(Collectors.toList())));
             }
 
