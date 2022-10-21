@@ -1,5 +1,6 @@
 package application.ui;
 
+import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -15,12 +16,15 @@ import org.eclipse.swt.widgets.Shell;
 import java.util.Date;
 
 public class NeuralProgressBar extends Dialog {
-    private final int max;
-    private ProgressBar progressBar;
+    private final int maxSamples;
+    private final int maxEpoch;
+    private ProgressBar progressBarSamples;
+    private ProgressBar progressBarEpoch;
 
-    protected NeuralProgressBar(Shell parentShell, int max) {
+    protected NeuralProgressBar(Shell parentShell, int maxSamples, int maxEpoch) {
         super(parentShell);
-        this.max = max;
+        this.maxSamples = maxSamples;
+        this.maxEpoch = maxEpoch;
     }
 
     @Override
@@ -38,18 +42,34 @@ public class NeuralProgressBar extends Dialog {
         Composite composite = (Composite)super.createDialogArea(parent);
         composite.setLayout(new GridLayout(2, false));
 
+        new Label(composite, SWT.NONE).setText("Epoches:");
+        progressBarEpoch = new ProgressBar(composite, SWT.SMOOTH);
+        progressBarEpoch.setSelection(0);
+        progressBarEpoch.setMaximum(maxEpoch);
+        progressBarEpoch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
         new Label(composite, SWT.NONE).setText("Samples:");
-        progressBar = new ProgressBar(composite, SWT.SMOOTH);
-        progressBar.setMaximum(max);
-        progressBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        progressBarSamples = new ProgressBar(composite, SWT.SMOOTH);
+        progressBarSamples.setSelection(0);
+        progressBarSamples.setMaximum(maxSamples);
+        progressBarSamples.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
         return composite;
     }
 
-    public void step(Date startDate){
-        progressBar.setSelection(progressBar.getSelection()+1);
-        if (progressBar.getSelection() == max) {
-            System.out.printf("=============== Network Learn took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-            close();
+    public synchronized void step(Date startDate, NeuralNetwork neuralNetwork){
+        progressBarSamples.setSelection(progressBarSamples.getSelection()+1);
+
+        if (progressBarSamples.getSelection() == maxSamples) {
+            neuralNetwork.saveWeights();
+            progressBarEpoch.setSelection(progressBarEpoch.getSelection()+1);
+
+            if (progressBarEpoch.getSelection() == maxEpoch) {
+                System.out.printf("=============== Network Learn took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+                close();
+            } else {
+                progressBarSamples.setSelection(0);
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ public class NeuralUI {
     private static final int WIDTH = 26*12;
     private static final int HEIGHT = 400;
     private static final int FONT_SIZE = 15;
+    private static final int EPOCH = 20;
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
@@ -120,16 +121,16 @@ public class NeuralUI {
     public void learn(){
         Date startDate = new Date();
 
-        Display.getDefault().asyncExec(()->{
-            NeuralProgressBar neuralProgressBar = new NeuralProgressBar(shell, ALPHABET_UPPER_CASE.length());
-            neuralProgressBar.setBlockOnOpen(false);
-            neuralProgressBar.open();
+        NeuralProgressBar neuralProgressBar = new NeuralProgressBar(shell, ALPHABET_UPPER_CASE.length(), EPOCH);
+        neuralProgressBar.setBlockOnOpen(false);
+        neuralProgressBar.open();
 
-            IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-                Display.getDefault().asyncExec(()->{
+        IntStream.range(0, EPOCH).forEach(epoch->{
+            Display.getDefault().asyncExec(()->{
+                IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
                     List<Double> delta = IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0).collect(Collectors.toList());
                     neuralNetwork.calculate(getInput(null, index), delta);
-                    neuralProgressBar.step(startDate);
+                    neuralProgressBar.step(startDate, neuralNetwork);
                 });
             });
         });

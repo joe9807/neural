@@ -29,10 +29,9 @@ public class NeuronExecutor {
         return neurons;
     }
 
-    public List<Weight> calculateWeights(int level, List<Double> input, List<Double> delta){
+    public void calculateWeights(List<Weight> weights, List<Double> input, List<Double> delta){
         final ForkJoinPool executor = new ForkJoinPool(20);
 
-        final List<Weight> weights = weightRepository.findAllByLevel(level);
         final List<Weight> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
 
@@ -46,7 +45,7 @@ public class NeuronExecutor {
         }
 
         while (!futures.isEmpty()) futures.removeIf(Future::isDone);
-        return processed;
+        weights.addAll(processed);
     }
 
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){

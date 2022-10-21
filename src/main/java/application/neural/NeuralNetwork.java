@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,6 +27,8 @@ public class NeuralNetwork {
 
     @Autowired
     public NeuronBackExecutor neuronBackExecutor;
+
+    private Map<Integer, List<Weight>> weights;
 
     public void recreate(int... neuronsCount){
         weightRepository.deleteAll();
@@ -44,7 +48,14 @@ public class NeuralNetwork {
         });
     }
 
+    public void saveWeights() {
+        weights.values().forEach(value-> weightRepository.saveAll(value));
+        weights = new HashMap<>();
+    }
+
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
+        if (weights == null) weights = new HashMap<>();
+
         List<List<Double>> outputs = new ArrayList<>();
         for (int levelNumber=0;levelNumber<weightRepository.findLevelsCount();levelNumber++){
             outputs.add(neuronExecutor.calculate(levelNumber, outputs.isEmpty()?(input == null?loadInput():input):outputs.get(outputs.size()-1), null));
@@ -57,7 +68,10 @@ public class NeuralNetwork {
             }
 
             for (int levelNumber=outputs.size()-1;levelNumber>0;levelNumber--){
-                weightRepository.saveAll(neuronExecutor.calculateWeights(levelNumber, outputs.get(levelNumber-1), deltas.get(levelNumber-1)));
+                if (weights.get(levelNumber) == null){
+                    weights.put(levelNumber, weightRepository.findAllByLevel(levelNumber));
+                }
+                neuronExecutor.calculateWeights(weights.get(levelNumber), outputs.get(levelNumber-1), deltas.get(levelNumber-1));
             }
         }
         return delta == null?outputs:deltas;
