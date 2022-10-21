@@ -30,12 +30,15 @@ public class NeuralNetwork {
 
     private Map<Integer, List<Weight>> weights;
 
-    public void recreate(int... neuronsCount){
+    @Autowired
+    private NeuralParameters parameters;
+
+    public void recreate(){
         weightRepository.deleteAll();
 
         final AtomicInteger prevCount = new AtomicInteger(0);
         final AtomicInteger levelNumber = new AtomicInteger(0);
-        Arrays.stream(neuronsCount).forEach(neuronCount->{
+        Arrays.stream(Arrays.stream(parameters.getLevels().split(";")).mapToInt(Integer::valueOf).toArray()).forEach(neuronCount->{
             if (prevCount.get() == 0) {//input level is here
                 weightRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number-> new Weight(levelNumber.get(), number, 1.0, 0)).collect(Collectors.toList()));
             } else {//hidden and output levels are here
@@ -71,7 +74,7 @@ public class NeuralNetwork {
                 if (weights.get(levelNumber) == null){
                     weights.put(levelNumber, weightRepository.findAllByLevel(levelNumber));
                 }
-                neuronExecutor.calculateWeights(weights.get(levelNumber), outputs.get(levelNumber-1), deltas.get(levelNumber-1));
+                neuronExecutor.calculateWeights(weights.get(levelNumber), outputs.get(levelNumber-1), deltas.get(levelNumber-1), parameters);
             }
         }
         return delta == null?outputs:deltas;
@@ -95,5 +98,13 @@ public class NeuralNetwork {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public NeuralParameters getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(NeuralParameters parameters) {
+        this.parameters = parameters;
     }
 }

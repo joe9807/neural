@@ -29,7 +29,7 @@ public class NeuronExecutor {
         return neurons;
     }
 
-    public void calculateWeights(List<Weight> weights, List<Double> input, List<Double> delta){
+    public void calculateWeights(List<Weight> weights, List<Double> input, List<Double> delta, NeuralParameters parameters){
         final ForkJoinPool executor = new ForkJoinPool(20);
 
         final List<Weight> processed = new ArrayList<>();
@@ -37,7 +37,7 @@ public class NeuronExecutor {
 
         while (weights.size() != 0) {
             for (Weight weight : weights) {
-                futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta)));
+                futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta, parameters)));
                 processed.add(weight);
             }
 
