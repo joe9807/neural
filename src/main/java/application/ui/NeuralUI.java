@@ -80,7 +80,8 @@ public class NeuralUI {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 NeuralRecreate neuralRecreate = new NeuralRecreate(shell, neuralNetwork.getParameters());
-                neuralRecreate.open();
+                if (neuralRecreate.open() != 0) return;
+
                 Date startDate = new Date();
                 neuralNetwork.recreate();
                 neuralNetwork.generateInput();
