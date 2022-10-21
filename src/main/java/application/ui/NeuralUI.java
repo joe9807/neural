@@ -73,14 +73,16 @@ public class NeuralUI {
 
     private void setMenu(Label label){
         Menu menu = new Menu(shell, SWT.NONE);
-        MenuItem learningItem = new MenuItem(menu, SWT.NONE);
-        learningItem.setText("Learn Network");
-        learningItem.addSelectionListener(new SelectionListener() {
+
+        MenuItem createItem = new MenuItem(menu, SWT.NONE);
+        createItem.setText("Create Network");
+        createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 Date startDate = new Date();
-                learn();
-                System.out.printf("=============== Network Learn took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+                neuralNetwork.recreate(216, 20, 26);
+                neuralNetwork.generateInput();
+                System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
             }
 
             @Override
@@ -101,15 +103,12 @@ public class NeuralUI {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        MenuItem createItem = new MenuItem(menu, SWT.NONE);
-        createItem.setText("Create Network");
-        createItem.addSelectionListener(new SelectionListener() {
+        MenuItem learningItem = new MenuItem(menu, SWT.NONE);
+        learningItem.setText("Learn Network");
+        learningItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                Date startDate = new Date();
-                neuralNetwork.recreate(216, 20, 26);
-                neuralNetwork.generateInput();
-                System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+                learn();
             }
 
             @Override
@@ -119,9 +118,20 @@ public class NeuralUI {
     }
 
     public void learn(){
-        IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-            List<Double> delta = IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0).collect(Collectors.toList());
-            neuralNetwork.calculate(getInput(null, index), delta);
+        Date startDate = new Date();
+
+        Display.getDefault().asyncExec(()->{
+            NeuralProgressBar neuralProgressBar = new NeuralProgressBar(shell, ALPHABET_UPPER_CASE.length());
+            neuralProgressBar.setBlockOnOpen(false);
+            neuralProgressBar.open();
+
+            IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
+                Display.getDefault().asyncExec(()->{
+                    List<Double> delta = IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0).collect(Collectors.toList());
+                    neuralNetwork.calculate(getInput(null, index), delta);
+                    neuralProgressBar.step(startDate);
+                });
+            });
         });
     }
 

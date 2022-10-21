@@ -11,7 +11,7 @@ public class NeuronWeightWorker implements Runnable{
     private final List<Double> input;
     private final List<Double> delta;
 
-    public  NeuronWeightWorker(Weight weight, List<Double> input, List<Double> delta){
+    public NeuronWeightWorker(Weight weight, List<Double> input, List<Double> delta){
         this.weight = weight;
         this.input = input;
         this.delta = delta;
