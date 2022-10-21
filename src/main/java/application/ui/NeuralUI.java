@@ -3,6 +3,7 @@ package application.ui;
 import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -46,6 +47,9 @@ public class NeuralUI {
     private Image image;
     private Label middleLabel;
     private Text text;
+    private MenuItem runItem;
+    private MenuItem learnItem;
+    private MenuItem createItem;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
@@ -74,7 +78,7 @@ public class NeuralUI {
     private void setMenu(Label label){
         Menu menu = new Menu(shell, SWT.NONE);
 
-        MenuItem createItem = new MenuItem(menu, SWT.NONE);
+        createItem = new MenuItem(menu, SWT.NONE);
         createItem.setText("Create Network");
         createItem.addSelectionListener(new SelectionListener() {
             @Override
@@ -86,15 +90,24 @@ public class NeuralUI {
                 neuralNetwork.recreate();
                 neuralNetwork.generateInput();
                 System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+
+                MessageDialog dialog = new MessageDialog(shell, "Question", null, "Neural Network "+ neuralNetwork.getParameters().getLevels()+" is created. Choose further action."
+                        , MessageDialog.QUESTION, new String[] {"Run", "Learn"}, 0);
+                int result = dialog.open();
+                if (result == 0) {
+                    runItem.notifyListeners(SWT.Selection, null);
+                } else if (result == 1) {
+                    learnItem.notifyListeners(SWT.Selection, null);
+                }
             }
 
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        MenuItem runTestItem = new MenuItem(menu, SWT.NONE);
-        runTestItem.setText("Run Network");
-        runTestItem.addSelectionListener(new SelectionListener() {
+        runItem = new MenuItem(menu, SWT.NONE);
+        runItem.setText("Run Network");
+        runItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 Date startDate = new Date();
@@ -106,9 +119,9 @@ public class NeuralUI {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        MenuItem learningItem = new MenuItem(menu, SWT.NONE);
-        learningItem.setText("Learn Network");
-        learningItem.addSelectionListener(new SelectionListener() {
+        learnItem = new MenuItem(menu, SWT.NONE);
+        learnItem.setText("Learn Network");
+        learnItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 learn();
