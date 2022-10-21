@@ -13,9 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
-public class NeuronLevel {
-    private final ForkJoinPool executor = new ForkJoinPool(20);
-
+public class NeuronExecutor {
     @Autowired
     private WeightRepository weightRepository;
 
@@ -32,6 +30,8 @@ public class NeuronLevel {
     }
 
     public List<Weight> calculateWeights(int level, List<Double> input, List<Double> delta){
+        final ForkJoinPool executor = new ForkJoinPool(20);
+
         final List<Weight> weights = weightRepository.findAllByLevel(level);
         final List<Weight> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
@@ -50,6 +50,8 @@ public class NeuronLevel {
     }
 
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
+        final ForkJoinPool executor = new ForkJoinPool(20);
+
         final List<Neuron> neurons = getNeurons(level, input, delta);
         final List<Neuron> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();

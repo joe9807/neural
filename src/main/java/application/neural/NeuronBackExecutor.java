@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
-public class NeuronBackLevel extends NeuronLevel{
+public class NeuronBackExecutor extends NeuronExecutor {
     @Autowired
     private WeightRepository weightRepository;
 

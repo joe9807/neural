@@ -2,7 +2,6 @@ package application.neural;
 
 import application.repository.WeightRepository;
 import application.repository.entity.Weight;
-import application.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -23,10 +21,10 @@ public class NeuralNetwork {
     private WeightRepository weightRepository;
 
     @Autowired
-    public NeuronLevel neuronLevel;
+    public NeuronExecutor neuronExecutor;
 
     @Autowired
-    public NeuronBackLevel neuronBackLevel;
+    public NeuronBackExecutor neuronBackExecutor;
 
     public void recreate(int... neuronsCount){
         weightRepository.deleteAll();
@@ -47,20 +45,19 @@ public class NeuralNetwork {
     }
 
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
-        double m = 0.1;
         List<List<Double>> outputs = new ArrayList<>();
         for (int levelNumber=0;levelNumber<weightRepository.findLevelsCount();levelNumber++){
-            outputs.add(neuronLevel.calculate(levelNumber, outputs.isEmpty()?(input == null?loadInput():input):outputs.get(outputs.size()-1), null));
+            outputs.add(neuronExecutor.calculate(levelNumber, outputs.isEmpty()?(input == null?loadInput():input):outputs.get(outputs.size()-1), null));
         }
 
         List<List<Double>> deltas = new ArrayList<>();
         if (delta != null) {
             for (int levelNumber=outputs.size();levelNumber>1;levelNumber--){
-                deltas.add(neuronBackLevel.calculate(levelNumber, outputs.get(levelNumber-1), deltas.isEmpty()?delta:deltas.get(deltas.size()-1)));
+                deltas.add(neuronBackExecutor.calculate(levelNumber, outputs.get(levelNumber-1), deltas.isEmpty()?delta:deltas.get(deltas.size()-1)));
             }
 
             for (int levelNumber=outputs.size()-1;levelNumber>0;levelNumber--){
-                weightRepository.saveAll(neuronLevel.calculateWeights(levelNumber, outputs.get(levelNumber-1), deltas.get(levelNumber-1)));
+                weightRepository.saveAll(neuronExecutor.calculateWeights(levelNumber, outputs.get(levelNumber-1), deltas.get(levelNumber-1)));
             }
         }
         return delta == null?outputs:deltas;

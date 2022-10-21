@@ -5,7 +5,7 @@ import application.repository.entity.Weight;
 import java.util.List;
 
 public class NeuronWeightWorker implements Runnable{
-    private static final double m = 0.2;
+    private static final double m = 0.4;
 
     private final Weight weight;
     private final List<Double> input;
