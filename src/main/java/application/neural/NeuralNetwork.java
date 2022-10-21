@@ -29,8 +29,6 @@ public class NeuralNetwork {
     public NeuronBackLevel neuronBackLevel;
 
     public void recreate(int... neuronsCount){
-        Date startDate = new Date();
-
         weightRepository.deleteAll();
 
         final AtomicInteger prevCount = new AtomicInteger(0);
@@ -46,14 +44,13 @@ public class NeuralNetwork {
             prevCount.set(neuronCount);
             levelNumber.incrementAndGet();
         });
-
-        System.out.printf("=============== Recreate weights took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
+        double m = 0.1;
         List<List<Double>> outputs = new ArrayList<>();
         for (int levelNumber=0;levelNumber<weightRepository.findLevelsCount();levelNumber++){
-            outputs.add(neuronLevel.calculate(levelNumber, outputs.isEmpty()?(input == null?generateInput():input):outputs.get(outputs.size()-1), null));
+            outputs.add(neuronLevel.calculate(levelNumber, outputs.isEmpty()?(input == null?loadInput():input):outputs.get(outputs.size()-1), null));
         }
 
         List<List<Double>> deltas = new ArrayList<>();
@@ -61,23 +58,24 @@ public class NeuralNetwork {
             for (int levelNumber=outputs.size();levelNumber>1;levelNumber--){
                 deltas.add(neuronBackLevel.calculate(levelNumber, outputs.get(levelNumber-1), deltas.isEmpty()?delta:deltas.get(deltas.size()-1)));
             }
+
+            for (int levelNumber=outputs.size()-1;levelNumber>0;levelNumber--){
+                weightRepository.saveAll(neuronLevel.calculateWeights(levelNumber, outputs.get(levelNumber-1), deltas.get(levelNumber-1)));
+            }
         }
         return delta == null?outputs:deltas;
     }
 
-    private List<Double> generateInput() {
-        //return loadInput();
-        return saveInput(IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList()));
+    public void generateInput() {
+        saveInput(IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList()));
     }
 
-    private List<Double> saveInput(List<Double> input) {
+    private void saveInput(List<Double> input) {
         try {
             Files.writeString(Path.of(getClass().getResource("/input.txt").toURI()), input.stream().map(String::valueOf).collect(Collectors.joining("\n")), StandardOpenOption.CREATE);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        return input;
     }
 
     private List<Double> loadInput() {

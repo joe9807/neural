@@ -1,6 +1,7 @@
 package application.ui;
 
 import application.neural.NeuralNetwork;
+import application.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -72,11 +74,13 @@ public class NeuralUI {
     private void setMenu(Label label){
         Menu menu = new Menu(shell, SWT.NONE);
         MenuItem learningItem = new MenuItem(menu, SWT.NONE);
-        learningItem.setText("Learn AI");
+        learningItem.setText("Learn Network");
         learningItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                Date startDate = new Date();
                 learn();
+                System.out.printf("=============== Network Learn took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
             }
 
             @Override
@@ -84,11 +88,28 @@ public class NeuralUI {
         });
 
         MenuItem runTestItem = new MenuItem(menu, SWT.NONE);
-        runTestItem.setText("Run AI");
+        runTestItem.setText("Run Network");
         runTestItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                Date startDate = new Date();
                 run();
+                System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {}
+        });
+
+        MenuItem createItem = new MenuItem(menu, SWT.NONE);
+        createItem.setText("Create Network");
+        createItem.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Date startDate = new Date();
+                neuralNetwork.recreate(216, 20, 26);
+                neuralNetwork.generateInput();
+                System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
             }
 
             @Override
@@ -98,7 +119,6 @@ public class NeuralUI {
     }
 
     public void learn(){
-        neuralNetwork.recreate(216, 20, 26);
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
             List<Double> delta = IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0).collect(Collectors.toList());
             neuralNetwork.calculate(getInput(null, index), delta);
@@ -106,8 +126,6 @@ public class NeuralUI {
     }
 
     public void run(){
-        neuralNetwork.recreate(216, 20, 26);
-
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);

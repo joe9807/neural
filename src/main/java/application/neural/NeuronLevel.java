@@ -31,6 +31,24 @@ public class NeuronLevel {
         return neurons;
     }
 
+    public List<Weight> calculateWeights(int level, List<Double> input, List<Double> delta){
+        final List<Weight> weights = weightRepository.findAllByLevel(level);
+        final List<Weight> processed = new ArrayList<>();
+        final List<Future<?>> futures = new ArrayList<>();
+
+        while (weights.size() != 0) {
+            for (Weight weight : weights) {
+                futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta)));
+                processed.add(weight);
+            }
+
+            weights.removeAll(processed);
+        }
+
+        while (!futures.isEmpty()) futures.removeIf(Future::isDone);
+        return processed;
+    }
+
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
         final List<Neuron> neurons = getNeurons(level, input, delta);
         final List<Neuron> processed = new ArrayList<>();
