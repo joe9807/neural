@@ -19,6 +19,10 @@ public class NeuronWeightWorker implements Runnable{
 
     @Override
     public void run() {
-        weight.setValue(weight.getValue()+Double.parseDouble(parameters.getM())*input.get(weight.getBackNumber())*delta.get(weight.getNumber()));
+        try {
+            weight.setValue(weight.getValue() + Double.parseDouble(parameters.getM()) * input.get(weight.getBackNumber()) * delta.get(weight.getNumber()));
+        }catch(Exception e){
+            System.out.printf("input.size() %s weight.getBackNumber() %s delta.size() %s weight.getNumber() %s%n", input.size(), weight.getBackNumber(), delta.size(), weight.getNumber());
+        }
     }
 }

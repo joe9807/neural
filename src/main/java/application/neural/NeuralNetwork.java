@@ -74,7 +74,7 @@ public class NeuralNetwork {
                 if (weights.get(levelNumber) == null){
                     weights.put(levelNumber, weightRepository.findAllByLevel(levelNumber));
                 }
-                neuronExecutor.calculateWeights(weights.get(levelNumber), outputs.get(levelNumber-1), deltas.get(levelNumber-1), parameters);
+                neuronExecutor.calculateWeights(weights.get(levelNumber), outputs.get(levelNumber-1), deltas.get(deltas.size()-levelNumber), parameters);
             }
         }
         return delta == null?outputs:deltas;
