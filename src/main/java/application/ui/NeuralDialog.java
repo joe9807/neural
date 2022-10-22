@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
-public class NeuralUI {
+public class NeuralDialog {
     private static final int WIDTH = 26*12;
     private static final int HEIGHT = 400;
     private static final int FONT_SIZE = 15;
@@ -57,7 +57,7 @@ public class NeuralUI {
     public void init(){
         shell = new Shell(new Display(), SWT.CLOSE);
         shell.setLayout(new RowLayout());
-        shell.setText("Neural UI");
+        shell.setText("Neural Network");
         shell.setSize(new Point(WIDTH*3+45, HEIGHT+50));
 
         Label leftLabel = new Label(shell, SWT.BORDER);
