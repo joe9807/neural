@@ -10,13 +10,14 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class NeuronExecutor {
     @Autowired
     private NeuralRepository neuralRepository;
 
-    protected List<Neuron> getNeurons(int level, List<Double> input, List<Double> delta) {
+    protected List<Neuron> getNeurons(int level, List<Double> input) {
         List<Neuron> neurons = new ArrayList<>();
         List<Weight> allWeights = neuralRepository.findAllByLevel(level);
 
@@ -25,6 +26,18 @@ public class NeuronExecutor {
         while ((neuronWeights = allWeights.stream().filter(weight-> weight.getNumber() == number.get()).sorted().map(Weight::getValue).collect(Collectors.toList())).size() !=0) {
             neurons.add(new Neuron(level, number.getAndIncrement(), neuronWeights, input));
         }
+        return neurons;
+    }
+
+    protected List<Neuron> getNeurons(int level, List<Double> input, List<Double> delta) {
+        List<Neuron> neurons = new ArrayList<>();
+        List<Weight> allWeights = neuralRepository.findAllByLevel(level);
+
+        final AtomicInteger number = new AtomicInteger();
+        IntStream.range(0, input.size()).forEach(backNumber->
+                neurons.add(new NeuronBack(level-1, number.getAndIncrement(), allWeights.stream().filter(weight->
+                        weight.getBackNumber() == backNumber).sorted().map(Weight::getValue).collect(Collectors.toList()), input, delta)));
+
         return neurons;
     }
 
@@ -50,7 +63,7 @@ public class NeuronExecutor {
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
         final ForkJoinPool executor = new ForkJoinPool(200);
 
-        final List<Neuron> neurons = getNeurons(level, input, delta);
+        final List<Neuron> neurons = delta == null?getNeurons(level, input):getNeurons(level, input, delta);
         if (neurons == null || neurons.isEmpty()) return null;
         final List<Neuron> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();

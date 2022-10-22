@@ -20,9 +20,6 @@ public class NeuralNetwork {
     public NeuronExecutor neuronExecutor;
 
     @Autowired
-    public NeuronBackExecutor neuronBackExecutor;
-
-    @Autowired
     public NeuralRepository neuralRepository;
 
     @Autowired
@@ -65,7 +62,7 @@ public class NeuralNetwork {
 
         List<List<Double>> deltas = new ArrayList<>();
         while (outputs.size()-deltas.size()>1) {
-            deltas.add(0, neuronBackExecutor.calculate(outputs.size()-deltas.size(), outputs.get(deltas.size()), deltas.stream().findFirst().orElse(delta)));
+            deltas.add(0, neuronExecutor.calculate(outputs.size()-deltas.size(), outputs.get(deltas.size()), deltas.stream().findFirst().orElse(delta)));
         }
 
         int level = outputs.size();
