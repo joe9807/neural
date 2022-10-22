@@ -52,6 +52,7 @@ public class NeuronExecutor {
         final ForkJoinPool executor = new ForkJoinPool(200);
 
         final List<Neuron> neurons = getNeurons(level, input, delta);
+        if (neurons == null || neurons.isEmpty()) return null;
         final List<Neuron> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
 

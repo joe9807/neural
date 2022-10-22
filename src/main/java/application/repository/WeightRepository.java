@@ -12,7 +12,4 @@ import java.util.List;
 public interface WeightRepository extends CrudRepository<Weight, Integer> {
     @Query("from Weight w where w.level=:level order by id")
     List<Weight> findAllByLevel(@Param("level") int level);
-
-    @Query(value = "select count(distinct level) from Weight", nativeQuery=true)
-    Integer findLevelsCount();
 }

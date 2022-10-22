@@ -63,9 +63,8 @@ public class NeuralNetwork {
         if (updates == null) updates = new HashMap<>();
 
         List<List<Double>> outputs = new ArrayList<>();
-        for (int levelNumber=0;levelNumber<weightRepository.findLevelsCount();levelNumber++){
-            outputs.add(neuronExecutor.calculate(levelNumber, outputs.isEmpty()?(input == null?loadInput():input):outputs.get(outputs.size()-1), null));
-        }
+        List<Double> output;
+        while ((output = neuronExecutor.calculate(outputs.size(), outputs.isEmpty()?input:outputs.get(outputs.size()-1), null)) != null) outputs.add(output);
 
         List<List<Double>> deltas = new ArrayList<>();
         if (delta != null) {
