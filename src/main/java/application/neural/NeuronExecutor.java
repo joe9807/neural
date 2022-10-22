@@ -44,7 +44,7 @@ public class NeuronExecutor {
             weights.removeAll(processed);
         }
 
-        while (!futures.isEmpty()) futures.removeIf(Future::isDone);
+        futures(futures);
         weights.addAll(processed);
     }
 
@@ -64,8 +64,24 @@ public class NeuronExecutor {
             neurons.removeAll(processed);
         }
 
-        while (!futures.isEmpty()) futures.removeIf(Future::isDone);
-
+        futures(futures);
         return processed.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
+    }
+
+    private void futures(List<Future<?>> futures){
+        while (!futures.isEmpty()) {
+            List<Future<?>> remove = new ArrayList<>();
+            for (Future<?> future:futures){
+                if (future.isDone()){
+                    try {
+                        future.get();
+                        remove.add(future);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            futures.removeAll(remove);
+        }
     }
 }
