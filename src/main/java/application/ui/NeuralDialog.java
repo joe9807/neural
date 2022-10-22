@@ -196,7 +196,7 @@ public class NeuralDialog {
         GC gcImage = new GC(image);
         gcImage.setFont(font);
         gcImage.drawString(ALPHABET_UPPER_CASE, 0, 0);
-        gcImage.drawString(ALPHABET_LOWER_CASE, 0, FONT_SIZE +1);
+        gcImage.drawString(ALPHABET_LOWER_CASE, 0, FONT_SIZE + 3);
 
         label.setImage(image);
 
