@@ -30,7 +30,7 @@ public class NeuronExecutor {
     }
 
     public void calculateWeights(List<Weight> weights, List<Double> input, List<Double> delta, NeuralParameters parameters){
-        final ForkJoinPool executor = new ForkJoinPool(20);
+        final ForkJoinPool executor = new ForkJoinPool(200);
 
         final List<Weight> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
@@ -49,7 +49,7 @@ public class NeuronExecutor {
     }
 
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
-        final ForkJoinPool executor = new ForkJoinPool(20);
+        final ForkJoinPool executor = new ForkJoinPool(200);
 
         final List<Neuron> neurons = getNeurons(level, input, delta);
         final List<Neuron> processed = new ArrayList<>();
