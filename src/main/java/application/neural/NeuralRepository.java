@@ -26,11 +26,11 @@ public class NeuralRepository {
 
     public void saveAll() {
         weights.values().forEach(value-> weightRepository.saveAll(value));
-        weights = new HashMap<>();
     }
 
     public void deleteAll(){
         weightRepository.deleteAll();
+        weights = new HashMap<>();
     }
 
     public Iterable<Weight> saveAll(List<Weight> all){

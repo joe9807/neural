@@ -18,9 +18,6 @@ import java.util.stream.IntStream;
 @Service
 public class NeuralNetwork {
     @Autowired
-    private WeightRepository weightRepository;
-
-    @Autowired
     public NeuronExecutor neuronExecutor;
 
     @Autowired
