@@ -38,7 +38,8 @@ public class NeuralNetwork {
 
         final AtomicInteger prevCount = new AtomicInteger(0);
         final AtomicInteger levelNumber = new AtomicInteger(0);
-        Arrays.stream(Arrays.stream(parameters.getLevels().split(";")).mapToInt(Integer::valueOf).toArray()).forEach(neuronCount->{
+        Arrays.stream(parameters.getLevels().split(";")).forEach(value->{
+            int neuronCount = Integer.parseInt(value);
             if (prevCount.get() == 0) {//input level is here
                 weightRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number->
                      new Weight(levelNumber.get(), number, 1.0, 0)
