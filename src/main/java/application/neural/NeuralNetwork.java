@@ -1,6 +1,5 @@
 package application.neural;
 
-import application.repository.WeightRepository;
 import application.repository.entity.Weight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
