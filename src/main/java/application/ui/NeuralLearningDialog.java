@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import java.util.Date;
 
-public class NeuralProgressBar extends Dialog {
+public class NeuralLearningDialog extends Dialog {
     private final int maxSamples;
     private final int maxEpoch;
     private ProgressBar progressBarSamples;
@@ -24,7 +24,7 @@ public class NeuralProgressBar extends Dialog {
     private Label samplesLabel;
     private Label result;
 
-    protected NeuralProgressBar(Shell parentShell, int maxSamples, int maxEpoch) {
+    protected NeuralLearningDialog(Shell parentShell, int maxSamples, int maxEpoch) {
         super(parentShell);
         this.maxSamples = maxSamples;
         this.maxEpoch = maxEpoch;

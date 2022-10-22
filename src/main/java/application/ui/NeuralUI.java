@@ -83,8 +83,8 @@ public class NeuralUI {
         createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                NeuralRecreate neuralRecreate = new NeuralRecreate(shell, neuralNetwork.getParameters());
-                if (neuralRecreate.open() != 0) return;
+                NeuralCreateDialog neuralCreateDialog = new NeuralCreateDialog(shell, neuralNetwork.getParameters());
+                if (neuralCreateDialog.open() != 0) return;
 
                 Date startDate = new Date();
                 neuralNetwork.recreate();
@@ -136,18 +136,18 @@ public class NeuralUI {
     public void learn(){
         Date startDate = new Date();
 
-        NeuralProgressBar neuralProgressBar = new NeuralProgressBar(shell, ALPHABET_UPPER_CASE.length(), Integer.parseInt(neuralNetwork.getParameters().getEpoches()));
-        neuralProgressBar.setBlockOnOpen(false);
-        neuralProgressBar.open();
+        NeuralLearningDialog neuralLearningDialog = new NeuralLearningDialog(shell, ALPHABET_UPPER_CASE.length(), Integer.parseInt(neuralNetwork.getParameters().getEpoches()));
+        neuralLearningDialog.setBlockOnOpen(false);
+        neuralLearningDialog.open();
 
         List<List<Double>> deltas = getDeltas();
 
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpoches())).forEach(epoch->{
             IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
                 Display.getDefault().asyncExec(()->{
-                    if (neuralProgressBar.getReturnCode() != 1) {
+                    if (neuralLearningDialog.getReturnCode() != 1) {
                         neuralNetwork.calculate(getInput(null, index), deltas.get(index));
-                        neuralProgressBar.step(startDate, neuralNetwork);
+                        neuralLearningDialog.step(startDate, neuralNetwork);
                     }
                 });
             });
