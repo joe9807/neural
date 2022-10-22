@@ -58,7 +58,7 @@ public class NeuralProgressBar extends Dialog {
     }
 
     public synchronized void step(Date startDate, NeuralNetwork neuralNetwork){
-        progressBarSamples.setSelection(progressBarSamples.getSelection()+1);
+        progressBarSamples.setSelection(progressBarSamples.getSelection());
 
         if (progressBarSamples.getSelection() == maxSamples) {
             neuralNetwork.saveWeights();
