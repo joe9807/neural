@@ -20,6 +20,9 @@ public class NeuralProgressBar extends Dialog {
     private final int maxEpoch;
     private ProgressBar progressBarSamples;
     private ProgressBar progressBarEpoch;
+    private Label epochesLabel;
+    private Label samplesLabel;
+    private Label result;
 
     protected NeuralProgressBar(Shell parentShell, int maxSamples, int maxEpoch) {
         super(parentShell);
@@ -40,7 +43,7 @@ public class NeuralProgressBar extends Dialog {
 
     protected Control createDialogArea(Composite parent) {
         Composite composite = (Composite)super.createDialogArea(parent);
-        composite.setLayout(new GridLayout(2, false));
+        composite.setLayout(new GridLayout(3, false));
 
         new Label(composite, SWT.NONE).setText("Epoches:");
         progressBarEpoch = new ProgressBar(composite, SWT.SMOOTH);
@@ -48,28 +51,42 @@ public class NeuralProgressBar extends Dialog {
         progressBarEpoch.setMaximum(maxEpoch);
         progressBarEpoch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+        epochesLabel = new Label(composite, SWT.NONE);
+        epochesLabel.setText(String.valueOf(maxEpoch));
+
         new Label(composite, SWT.NONE).setText("Samples:");
         progressBarSamples = new ProgressBar(composite, SWT.SMOOTH);
         progressBarSamples.setSelection(0);
         progressBarSamples.setMaximum(maxSamples);
         progressBarSamples.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+        samplesLabel = new Label(composite, SWT.NONE);
+        samplesLabel.setText(String.valueOf(maxEpoch));
+
+        result = new Label(parent, SWT.NONE);
         return composite;
     }
 
     public synchronized void step(Date startDate, NeuralNetwork neuralNetwork){
-        progressBarSamples.setSelection(progressBarSamples.getSelection());
+        progressBarSamples.setSelection(progressBarSamples.getSelection()+1);
 
         if (progressBarSamples.getSelection() == maxSamples) {
-            neuralNetwork.saveWeights();
             progressBarEpoch.setSelection(progressBarEpoch.getSelection()+1);
+
+            neuralNetwork.saveWeights();
 
             if (progressBarEpoch.getSelection() == maxEpoch) {
                 System.out.printf("=============== Network Learn took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-                close();
+                result.setText("Network has learned!");
+                result.pack(true);
             } else {
                 progressBarSamples.setSelection(0);
             }
         }
+
+        epochesLabel.setText(String.valueOf(maxEpoch-progressBarEpoch.getSelection()));
+        samplesLabel.setText(String.valueOf(maxSamples-progressBarSamples.getSelection()));
+        samplesLabel.pack(true);
+        epochesLabel.pack(true);
     }
 }

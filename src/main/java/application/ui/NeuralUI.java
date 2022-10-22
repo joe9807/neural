@@ -145,8 +145,10 @@ public class NeuralUI {
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpoches())).forEach(epoch->{
             Display.getDefault().asyncExec(()->{
                 IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-                    neuralNetwork.calculate(getInput(null, index), deltas.get(index));
-                    neuralProgressBar.step(startDate, neuralNetwork);
+                    if (neuralProgressBar.getReturnCode() != 1) {
+                        neuralNetwork.calculate(getInput(null, index), deltas.get(index));
+                        neuralProgressBar.step(startDate, neuralNetwork);
+                    }
                 });
             });
         });
