@@ -61,7 +61,7 @@ public class NeuralLearningDialog extends Dialog {
         progressBarSamples.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         samplesLabel = new Label(composite, SWT.NONE);
-        samplesLabel.setText(String.valueOf(maxEpoch));
+        samplesLabel.setText(String.valueOf(maxSamples));
 
         result = new Label(composite, SWT.NONE);
         result.setLayoutData(new GridData());
