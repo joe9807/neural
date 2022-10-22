@@ -10,9 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,23 +27,24 @@ public class NeuralNetwork {
     public NeuronBackExecutor neuronBackExecutor;
 
     @Autowired
+    public NeuralRepository neuralRepository;
+
+    @Autowired
     private NeuralParameters parameters;
 
-    private Map<Integer, List<Weight>> updates;
-
     public void recreate(){
-        weightRepository.deleteAll();
+        neuralRepository.deleteAll();
 
         final AtomicInteger prevCount = new AtomicInteger(0);
         final AtomicInteger levelNumber = new AtomicInteger(0);
         Arrays.stream(parameters.getLevels().split(";")).forEach(value->{
             int neuronCount = Integer.parseInt(value);
             if (prevCount.get() == 0) {//input level is here
-                weightRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number->
+                neuralRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number->
                      new Weight(levelNumber.get(), number, 1.0, 0)
                 ).collect(Collectors.toList()));
             } else {//hidden and output levels are here
-                IntStream.range(0, neuronCount).forEach(number-> weightRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(backNumber->
+                IntStream.range(0, neuronCount).forEach(number-> neuralRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(backNumber->
                     new Weight(levelNumber.get(), number, Math.random()-0.5, backNumber)
                 ).collect(Collectors.toList())));
             }
@@ -56,13 +55,10 @@ public class NeuralNetwork {
     }
 
     public void saveWeights() {
-        updates.values().forEach(value-> weightRepository.saveAll(value));
-        updates = new HashMap<>();
+        neuralRepository.saveAll();;
     }
 
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
-        if (updates == null) updates = new HashMap<>();
-
         List<List<Double>> outputs = new ArrayList<>();
         List<Double> output;
         while ((output = neuronExecutor.calculate(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)) != null) {
@@ -78,15 +74,14 @@ public class NeuralNetwork {
 
         int level = outputs.size();
         while (--level>0) {
-            if (updates.get(level) == null) updates.put(level, weightRepository.findAllByLevel(level));
-            neuronExecutor.calculateWeights(updates.get(level), outputs.get(outputs.size()-level), deltas.get(level-1), parameters);
+            neuronExecutor.calculateWeights(neuralRepository.findAllByLevel(level), outputs.get(outputs.size()-level), deltas.get(level-1), parameters);
         }
 
         return deltas;
     }
 
     public void generateInput() {
-        saveInput(IntStream.range(0, weightRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList()));
+        saveInput(IntStream.range(0, neuralRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList()));
     }
 
     private void saveInput(List<Double> input) {

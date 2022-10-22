@@ -1,6 +1,5 @@
 package application.neural;
 
-import application.repository.WeightRepository;
 import application.repository.entity.Weight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,11 +13,11 @@ import java.util.stream.IntStream;
 @Service
 public class NeuronBackExecutor extends NeuronExecutor {
     @Autowired
-    private WeightRepository weightRepository;
+    private NeuralRepository neuralRepository;
 
     protected List<Neuron> getNeurons(int level, List<Double> input, List<Double> delta) {
         List<Neuron> neurons = new ArrayList<>();
-        List<Weight> allWeights = weightRepository.findAllByLevel(level);
+        List<Weight> allWeights = neuralRepository.findAllByLevel(level);
 
         final AtomicInteger number = new AtomicInteger();
         IntStream.range(0, input.size()).forEach(backNumber->{
