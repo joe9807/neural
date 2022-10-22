@@ -76,9 +76,9 @@ public class NeuralLearningDialog extends Dialog {
             progressBarEpoch.setSelection(progressBarEpoch.getSelection()+1);
             updateLabels();
 
-            neuralNetwork.saveWeights();
-
             if (progressBarEpoch.getSelection() == maxEpoch) {
+                neuralNetwork.saveWeights();
+
                 String elapsed = Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
                 result.setText("Network has learned. Time elapsed: "+elapsed);
                 System.out.println("=============== Network Learn took: "+elapsed);
