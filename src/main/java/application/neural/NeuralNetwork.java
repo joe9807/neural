@@ -64,22 +64,24 @@ public class NeuralNetwork {
 
         List<List<Double>> outputs = new ArrayList<>();
         List<Double> output;
-        while ((output = neuronExecutor.calculate(outputs.size(), outputs.isEmpty()?input:outputs.get(outputs.size()-1), null)) != null) outputs.add(output);
+        while ((output = neuronExecutor.calculate(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)) != null) {
+            outputs.add(0, output);
+        }
+
+        if (delta == null) return outputs;
 
         List<List<Double>> deltas = new ArrayList<>();
-        if (delta != null) {
-            for (int levelNumber=outputs.size();levelNumber>1;levelNumber--){
-                deltas.add(neuronBackExecutor.calculate(levelNumber, outputs.get(levelNumber-1), deltas.isEmpty()?delta:deltas.get(deltas.size()-1)));
-            }
-
-            for (int levelNumber=outputs.size()-1;levelNumber>0;levelNumber--){
-                if (updates.get(levelNumber) == null){
-                    updates.put(levelNumber, weightRepository.findAllByLevel(levelNumber));
-                }
-                neuronExecutor.calculateWeights(updates.get(levelNumber), outputs.get(levelNumber-1), deltas.get(deltas.size()-levelNumber), parameters);
-            }
+        while (outputs.size()-deltas.size()>1) {
+            deltas.add(0, neuronBackExecutor.calculate(outputs.size()-deltas.size(), outputs.get(deltas.size()), deltas.stream().findFirst().orElse(delta)));
         }
-        return delta == null?outputs:deltas;
+
+        int level = outputs.size();
+        while (--level>0) {
+            if (updates.get(level) == null) updates.put(level, weightRepository.findAllByLevel(level));
+            neuronExecutor.calculateWeights(updates.get(level), outputs.get(outputs.size()-level), deltas.get(level-1), parameters);
+        }
+
+        return deltas;
     }
 
     public void generateInput() {

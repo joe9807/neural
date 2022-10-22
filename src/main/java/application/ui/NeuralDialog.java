@@ -164,7 +164,7 @@ public class NeuralDialog {
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-            List<Double> result = neuralNetwork.calculate(getInput(imageData, index), null).stream().reduce((first, second) -> second).orElse(null);
+            List<Double> result = neuralNetwork.calculate(getInput(imageData, index), null).stream().findFirst().orElse(null);
             String ch = ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt())+StringUtils.EMPTY;
             scan.set(scan.get()+ch);
         });
