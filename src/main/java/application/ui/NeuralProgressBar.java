@@ -63,7 +63,9 @@ public class NeuralProgressBar extends Dialog {
         samplesLabel = new Label(composite, SWT.NONE);
         samplesLabel.setText(String.valueOf(maxEpoch));
 
-        result = new Label(parent, SWT.NONE);
+        result = new Label(composite, SWT.NONE);
+        result.setLayoutData(new GridData());
+        ((GridData)result.getLayoutData()).horizontalSpan=3;
         return composite;
     }
 
@@ -76,17 +78,20 @@ public class NeuralProgressBar extends Dialog {
             neuralNetwork.saveWeights();
 
             if (progressBarEpoch.getSelection() == maxEpoch) {
-                System.out.printf("=============== Network Learn took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-                result.setText("Network has learned!");
-                result.pack(true);
+                result.setText("Network has learned. Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
             } else {
                 progressBarSamples.setSelection(0);
             }
         }
 
+        updateLabels();
+    }
+
+    public void updateLabels(){
         epochesLabel.setText(String.valueOf(maxEpoch-progressBarEpoch.getSelection()));
         samplesLabel.setText(String.valueOf(maxSamples-progressBarSamples.getSelection()));
         samplesLabel.pack(true);
         epochesLabel.pack(true);
+        result.pack(true);
     }
 }
