@@ -140,15 +140,21 @@ public class NeuralUI {
         neuralProgressBar.setBlockOnOpen(false);
         neuralProgressBar.open();
 
+        List<List<Double>> deltas = getDeltas();
+
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpoches())).forEach(epoch->{
             Display.getDefault().asyncExec(()->{
                 IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
-                    List<Double> delta = IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0).collect(Collectors.toList());
-                    neuralNetwork.calculate(getInput(null, index), delta);
+                    neuralNetwork.calculate(getInput(null, index), deltas.get(index));
                     neuralProgressBar.step(startDate, neuralNetwork);
                 });
             });
         });
+    }
+
+    private List<List<Double>> getDeltas(){
+        return IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(index-> IntStream.range(0, ALPHABET_UPPER_CASE.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0)
+                .collect(Collectors.toList())).collect(Collectors.toList());
     }
 
     public void run(){
