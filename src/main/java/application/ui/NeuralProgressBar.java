@@ -74,6 +74,7 @@ public class NeuralProgressBar extends Dialog {
 
         if (progressBarSamples.getSelection() == maxSamples) {
             progressBarEpoch.setSelection(progressBarEpoch.getSelection()+1);
+            updateLabels();
 
             neuralNetwork.saveWeights();
 
