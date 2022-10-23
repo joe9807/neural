@@ -13,10 +13,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class NeuronExecutor {
+    private ForkJoinPool forkJoinPool = new ForkJoinPool(200);
     @Autowired
     private NeuralRepository neuralRepository;
 
-    protected List<List<Double>> getNeurons(int level, boolean back) {
+    protected List<List<Double>> getMatrix(int level, boolean back) {
         List<List<Double>> result = new ArrayList<>();
         final AtomicInteger number = new AtomicInteger();
 
@@ -52,39 +53,27 @@ public class NeuronExecutor {
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
         if (level == 0) return input;
 
-        List<Double> result = new ArrayList<>();
-        if (delta == null){
-            for (List<Double> line : getNeurons(level, false)) {
-                double value = 0.0;
-                for (int j = 0; j < line.size(); j++) {
-                    value += line.get(j) * input.get(j);
-                }
+        List<Neuron> neurons = new ArrayList<>();
+        final List<Future<?>> futures = new ArrayList<>();
 
-                result.add(1 / (1 + Math.exp(-1 * value)));
+        if (delta == null){
+            List<List<Double>> matrix = getMatrix(level, false);
+            for (int i=0;i<matrix.size();i++) {
+                Neuron neuron = new Neuron(i, matrix.get(i), input);
+                neurons.add(neuron);
+                futures.add(forkJoinPool.submit(neuron.getWorker()));
             }
         } else {
-            List<List<Double>> matrix = getNeurons(level, true);
-            if (matrix.size() == 0){
-                for (int i=0;i<input.size();i++){
-                    double tk = delta.get(i);
-                    double ok = input.get(i);
-                    result.add(ok*(1-ok)*(tk-ok));
-                }
-            } else {
-                for (int j=0;j<input.size();j++){
-                    List<Double> line = matrix.get(j);
-
-                    double value = 0.0;
-                    for (int k = 0; k < line.size(); k++) {
-                        value += line.get(k) * delta.get(k);
-                    }
-
-                    result.add(input.get(j)*(1-input.get(j))*value);
-                }
+            List<List<Double>> matrix = getMatrix(level, true);
+            for (int j=0;j<input.size();j++){
+                Neuron neuron = new NeuronBack(j, matrix.size() == 0?null:matrix.get(j), input, delta);
+                neurons.add(neuron);
+                futures.add(forkJoinPool.submit(neuron.getWorker()));
             }
         }
 
-        return result;
+        futures(futures);
+        return neurons.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
     }
 
     private void futures(List<Future<?>> futures){

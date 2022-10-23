@@ -12,7 +12,7 @@ public class NeuronBackWorker implements Runnable{
         double inputK = neuron.getInput().get(neuron.getNumber());
         double delta = 0;
 
-        if (neuron.getWeights().isEmpty()) {
+        if (neuron.getWeights() == null) {
             delta = neuron.getDelta().get(neuron.getNumber())-inputK;
         } else {
             int index = 0;

@@ -8,8 +8,8 @@ import java.util.List;
 public class NeuronBack extends Neuron {
     private List<Double> delta;
 
-    public NeuronBack(int level, int number, List<Double> weights, List<Double> input, List<Double> delta) {
-        super(level, number, weights, input);
+    public NeuronBack(int number, List<Double> weights, List<Double> input, List<Double> delta) {
+        super(number, weights, input);
         this.delta = delta;
     }
 
