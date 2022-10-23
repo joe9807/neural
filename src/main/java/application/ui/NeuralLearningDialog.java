@@ -4,6 +4,8 @@ import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -16,18 +18,19 @@ import org.eclipse.swt.widgets.Shell;
 import java.util.Date;
 
 public class NeuralLearningDialog extends Dialog {
-    private final int maxSamples;
-    private final int maxEpoch;
-    private ProgressBar progressBarSamples;
     private ProgressBar progressBarEpoch;
-    private Label epochesLabel;
-    private Label samplesLabel;
     private Label result;
+    private final int maxEpoch;
+    private final int maxSamples;
+    private int progressSamples;
+    private int progressEpoches;
+    private final NeuralNetwork neuralNetwork;
 
-    protected NeuralLearningDialog(Shell parentShell, int maxSamples, int maxEpoch) {
+    protected NeuralLearningDialog(Shell parentShell, NeuralNetwork neuralNetwork) {
         super(parentShell);
-        this.maxSamples = maxSamples;
-        this.maxEpoch = maxEpoch;
+        this.neuralNetwork = neuralNetwork;
+        this.maxEpoch = Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber());
+        this.maxSamples = neuralNetwork.getParameters().getSamplesNumber();
     }
 
     @Override
@@ -38,63 +41,58 @@ public class NeuralLearningDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(300, 200);
+        return new Point(350, 200);
     }
 
     protected Control createDialogArea(Composite parent) {
         Composite composite = (Composite)super.createDialogArea(parent);
-        composite.setLayout(new GridLayout(3, false));
+        composite.setLayout(new GridLayout(1, false));
 
-        new Label(composite, SWT.NONE).setText("Epoches:");
         progressBarEpoch = new ProgressBar(composite, SWT.SMOOTH);
         progressBarEpoch.setSelection(0);
-        progressBarEpoch.setMaximum(maxEpoch);
+        progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
         progressBarEpoch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        epochesLabel = new Label(composite, SWT.NONE);
-        epochesLabel.setText(String.valueOf(maxEpoch));
-
-        new Label(composite, SWT.NONE).setText("Samples:");
-        progressBarSamples = new ProgressBar(composite, SWT.SMOOTH);
-        progressBarSamples.setSelection(0);
-        progressBarSamples.setMaximum(maxSamples);
-        progressBarSamples.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        samplesLabel = new Label(composite, SWT.NONE);
-        samplesLabel.setText(String.valueOf(maxSamples));
 
         result = new Label(composite, SWT.NONE);
         result.setLayoutData(new GridData());
-        ((GridData)result.getLayoutData()).horizontalSpan=3;
+        result.setText(neuralNetwork.getParameters().toString());
+
+        progressBarEpoch.addPaintListener(e -> {
+            String string = String.format("Epoches: %3s; Samples: %3s", maxEpoch-progressEpoches, maxSamples-progressSamples);
+
+            Point point = progressBarEpoch.getSize();
+            Font font = new Font(getParentShell().getDisplay(), "Tahoma", 8, SWT.NORMAL);
+            e.gc.setFont(font);
+            e.gc.setForeground(getParentShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
+
+            FontMetrics fontMetrics = e.gc.getFontMetrics();
+            int stringWidth = fontMetrics.getAverageCharWidth() * string.length();
+            int stringHeight = fontMetrics.getHeight();
+
+            e.gc.drawString(string, (point.x-stringWidth)/2 , (point.y-stringHeight)/2, true);
+            font.dispose();
+        });
         return composite;
     }
 
-    public synchronized void step(Date startDate, NeuralNetwork neuralNetwork){
-        progressBarSamples.setSelection(progressBarSamples.getSelection()+1);
+    public void step(Date startDate, NeuralNetwork neuralNetwork){
+        progressSamples++;
 
-        if (progressBarSamples.getSelection() == maxSamples) {
-            progressBarEpoch.setSelection(progressBarEpoch.getSelection()+1);
-            updateLabels();
+        if (progressSamples >= maxSamples) {
+            progressEpoches++;
 
-            if (progressBarEpoch.getSelection() == maxEpoch) {
+            if (progressEpoches == maxEpoch) {
                 neuralNetwork.saveWeights();
 
                 String elapsed = Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
                 result.setText("Network has learned. Time elapsed: "+elapsed);
+                result.update();
                 System.out.println("=============== Network Learn took: "+elapsed);
             } else {
-                progressBarSamples.setSelection(0);
+                progressSamples = 0;
             }
         }
 
-        updateLabels();
-    }
-
-    public void updateLabels(){
-        epochesLabel.setText(String.valueOf(maxEpoch-progressBarEpoch.getSelection()));
-        samplesLabel.setText(String.valueOf(maxSamples-progressBarSamples.getSelection()));
-        samplesLabel.pack(true);
-        epochesLabel.pack(true);
-        result.pack(true);
+        progressBarEpoch.setSelection(progressEpoches);
     }
 }

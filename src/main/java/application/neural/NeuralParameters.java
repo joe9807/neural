@@ -7,11 +7,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class NeuralParameters {
     private String levels = "216;20;26";
-    private String epoches = "150";
+    private String epochesNumber = "150";
+    private int samplesNumber;
     private String m = "0.4";
 
     public int getOutputCount(){
         String[] split =  levels.split(";");
         return Integer.parseInt(split[split.length-1]);
+    }
+
+    public String toString(){
+        return String.format("Levels: %s; Max Epoches: %s; Max Samples: %s; M: %s", levels, epochesNumber, samplesNumber, m);
     }
 }

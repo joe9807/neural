@@ -136,13 +136,14 @@ public class NeuralDialog {
     public void learn(){
         Date startDate = new Date();
 
-        NeuralLearningDialog neuralLearningDialog = new NeuralLearningDialog(shell, ALPHABET_UPPER_CASE.length(), Integer.parseInt(neuralNetwork.getParameters().getEpoches()));
+        neuralNetwork.getParameters().setSamplesNumber(ALPHABET_UPPER_CASE.length());
+        NeuralLearningDialog neuralLearningDialog = new NeuralLearningDialog(shell, neuralNetwork);
         neuralLearningDialog.setBlockOnOpen(false);
         neuralLearningDialog.open();
 
         List<List<Double>> deltas = getDeltas();
 
-        IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpoches())).forEach(epoch->{
+        IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
             IntStream.range(0, ALPHABET_UPPER_CASE.length()).forEach(index-> {
                 Display.getDefault().asyncExec(()->{
                     if (neuralLearningDialog.getReturnCode() != 1) {

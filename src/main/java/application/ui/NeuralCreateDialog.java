@@ -44,8 +44,8 @@ public class NeuralCreateDialog extends Dialog {
         new Label(composite, SWT.NONE).setText("Epoches:");
         Text epochesText = new Text(composite, SWT.BORDER);
         epochesText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        epochesText.setText(String.valueOf(parameters.getEpoches()));
-        epochesText.addModifyListener(e -> parameters.setEpoches(((Text)e.widget).getText()));
+        epochesText.setText(String.valueOf(parameters.getEpochesNumber()));
+        epochesText.addModifyListener(e -> parameters.setEpochesNumber(((Text)e.widget).getText()));
 
         new Label(composite, SWT.NONE).setText("M:");
         Text mText = new Text(composite, SWT.BORDER);
