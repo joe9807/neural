@@ -31,9 +31,9 @@ public class NeuronExecutor {
         return result;
     }
 
-    public void calculateWeights(List<Weight> weights, List<Double> input, List<Double> delta, NeuralParameters parameters){
+    public void calculateWeights(int level, List<Double> input, List<Double> delta, NeuralParameters parameters){
         final List<Future<?>> futures = new ArrayList<>();
-        for (Weight weight : weights) {
+        for (Weight weight : neuralRepository.findAllByLevel(level)) {
             futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta, parameters)));
         }
 
