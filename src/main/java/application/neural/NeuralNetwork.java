@@ -54,7 +54,7 @@ public class NeuralNetwork {
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
         List<List<Double>> outputs = new ArrayList<>();
         List<Double> output;
-        while ((output = neuronExecutor.calculate(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)) != null) {
+        while ((output = neuronExecutor.calculate(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)).size() != 0) {
             outputs.add(0, output);
         }
 

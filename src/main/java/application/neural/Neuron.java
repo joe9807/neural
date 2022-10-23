@@ -11,15 +11,13 @@ import java.util.List;
 public class Neuron implements Comparable<Neuron>{
     private List<Double> weights;
     private List<Double> input;
-    private int level;
     private int number;
     private double output;
 
-    public Neuron(int level, int number, List<Double> weights, List<Double> input){
-        this.level = level;
+    public Neuron(int number, List<Double> weights, List<Double> input){
         this.number = number;
         this.weights = weights;
-        this.input = level == 0 ? Collections.singletonList(input.get(number)):input;
+        this.input = input;
     }
 
     @Override
