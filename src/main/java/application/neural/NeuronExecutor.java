@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NeuronExecutor {
-    private ForkJoinPool forkJoinPool = new ForkJoinPool(200);
+    private ForkJoinPool executor = new ForkJoinPool(200);
     @Autowired
     private NeuralRepository neuralRepository;
 
@@ -32,43 +32,32 @@ public class NeuronExecutor {
     }
 
     public void calculateWeights(List<Weight> weights, List<Double> input, List<Double> delta, NeuralParameters parameters){
-        final ForkJoinPool executor = new ForkJoinPool(200);
-
-        final List<Weight> processed = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
-
-        while (weights.size() != 0) {
-            for (Weight weight : weights) {
-                futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta, parameters)));
-                processed.add(weight);
-            }
-
-            weights.removeAll(processed);
+        for (Weight weight : weights) {
+            futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta, parameters)));
         }
 
         futures(futures);
-        weights.addAll(processed);
     }
 
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
         if (level == 0) return input;
 
-        List<Neuron> neurons = new ArrayList<>();
+        final List<Neuron> neurons = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
 
+        List<List<Double>> matrix = getMatrix(level, delta != null);
         if (delta == null){
-            List<List<Double>> matrix = getMatrix(level, false);
             for (int i=0;i<matrix.size();i++) {
                 Neuron neuron = new Neuron(i, matrix.get(i), input);
                 neurons.add(neuron);
-                futures.add(forkJoinPool.submit(neuron.getWorker()));
+                futures.add(executor.submit(neuron.getWorker()));
             }
         } else {
-            List<List<Double>> matrix = getMatrix(level, true);
             for (int j=0;j<input.size();j++){
                 Neuron neuron = new NeuronBack(j, matrix.size() == 0?null:matrix.get(j), input, delta);
                 neurons.add(neuron);
-                futures.add(forkJoinPool.submit(neuron.getWorker()));
+                futures.add(executor.submit(neuron.getWorker()));
             }
         }
 
