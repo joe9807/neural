@@ -147,7 +147,7 @@ public class NeuralDialog {
             IntStream.range(0, ALPHABET.length()).forEach(index-> {
                 Display.getDefault().asyncExec(()->{
                     if (neuralLearningDialog.getReturnCode() != 1) {
-                        neuralNetwork.calculate(getInput(null, index, -1), deltas.get(index));
+                        neuralNetwork.calculate(getInput(null, index, index, -1), deltas.get(index));
                         neuralLearningDialog.step(startDate, neuralNetwork);
                     }
                 });
@@ -166,12 +166,13 @@ public class NeuralDialog {
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         IntStream.range(0, ALPHABET.length()).forEach(index-> {
-            List<Double> result = neuralNetwork.calculate(getInput(imageData, index, -1), null).stream().findFirst().orElse(null);
+            List<Double> result = neuralNetwork.calculate(getInput(imageData, index, index, -1), null).stream().findFirst().orElse(null);
 
-            String gotLetter = String.valueOf(ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt()));
+            int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
+            String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
             String shouldLetter = String.valueOf(ALPHABET.charAt(index));
 
-            getInput(imageData, index, gotLetter.equals(shouldLetter)?2:3);
+            getInput(imageData, gotIndex, index, gotLetter.equals(shouldLetter)?2:3);
             scan.set(scan.get()+gotLetter);
             if (scan.get().replaceAll("\n", "").length()%26 == 0) {
                 scan.set(scan.get()+"\n");
@@ -183,24 +184,34 @@ public class NeuralDialog {
         shell.layout();
     }
 
-    private List<Double> getInput(ImageData imageData, int index, int pixelToSet){
+    private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){
         int frameX = 12;
         int frameY = FONT_SIZE + 3;
         int shiftFrameX = image.getImageData().width/frameX;
-        int shiftY = frameY*(index / shiftFrameX);
-        int shiftX = index % shiftFrameX;
+
+
+        int shiftReadY = frameY*(indexRead / shiftFrameX);
+        int shiftReadX = indexRead % shiftFrameX;
+
+        int shiftWriteY = frameY*(indexWrite / shiftFrameX);
+        int shiftWriteX = indexWrite % shiftFrameX;
 
         List<Double> input = new ArrayList<>();
         IntStream.range(0, frameX).forEach(x->{
             IntStream.range(0, frameY).forEach(y->{
-                int getX = shiftX*frameX + x;
-                int getY = shiftY+y+2;
+                int readX = shiftReadX*frameX + x;
+                int readY = shiftReadY+y+2;
 
-                int pixelValue = image.getImageData().getPixel(getX, getY);
+                int writeX = shiftWriteX*frameX + x;
+                int writeY = shiftWriteY+y+2;
+
+                int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
-                    imageData.setPixel(getX, getY, pixelToSet<0?pixelValue:(pixelValue == 0?pixelValue:pixelToSet));
+                    if (indexRead == indexWrite || readValue != 0){
+                        imageData.setPixel(writeX, writeY, pixelToSet<0?readValue:(readValue==1?pixelToSet:0));
+                    }
                 }
-                input.add((double) pixelValue);
+                input.add((double) readValue);
             });
         });
 
