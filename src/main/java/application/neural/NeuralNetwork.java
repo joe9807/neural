@@ -48,7 +48,7 @@ public class NeuralNetwork {
     }
 
     public void saveWeights() {
-        neuralRepository.saveAll();;
+        neuralRepository.saveAll();
     }
 
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
