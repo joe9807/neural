@@ -147,7 +147,7 @@ public class NeuralDialog {
             IntStream.range(0, ALPHABET.length()).forEach(index-> {
                 Display.getDefault().asyncExec(()->{
                     if (neuralLearningDialog.getReturnCode() != 1) {
-                        neuralNetwork.calculate(getInput(null, index), deltas.get(index));
+                        neuralNetwork.calculate(getInput(null, index, -1), deltas.get(index));
                         neuralLearningDialog.step(startDate, neuralNetwork);
                     }
                 });
@@ -161,13 +161,18 @@ public class NeuralDialog {
     }
 
     public void run(){
-        ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
+        ImageData imageData = new ImageData(WIDTH, HEIGHT, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
+                new RGB(0, 255, 0), new RGB(255, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         IntStream.range(0, ALPHABET.length()).forEach(index-> {
-            List<Double> result = neuralNetwork.calculate(getInput(imageData, index), null).stream().findFirst().orElse(null);
-            String ch = ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt())+StringUtils.EMPTY;
-            scan.set(scan.get()+ch);
+            List<Double> result = neuralNetwork.calculate(getInput(imageData, index, -1), null).stream().findFirst().orElse(null);
+
+            String gotLetter = String.valueOf(ALPHABET.charAt(IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt()));
+            String shouldLetter = String.valueOf(ALPHABET.charAt(index));
+
+            getInput(imageData, index, gotLetter.equals(shouldLetter)?2:3);
+            scan.set(scan.get()+gotLetter);
             if (scan.get().replaceAll("\n", "").length()%26 == 0) {
                 scan.set(scan.get()+"\n");
             }
@@ -178,7 +183,7 @@ public class NeuralDialog {
         shell.layout();
     }
 
-    private List<Double> getInput(ImageData imageData, int index){
+    private List<Double> getInput(ImageData imageData, int index, int pixelToSet){
         int frameX = 12;
         int frameY = FONT_SIZE + 3;
         int shiftFrameX = image.getImageData().width/frameX;
@@ -193,7 +198,7 @@ public class NeuralDialog {
 
                 int pixelValue = image.getImageData().getPixel(getX, getY);
                 if (imageData != null) {
-                    imageData.setPixel(getX, getY, pixelValue);
+                    imageData.setPixel(getX, getY, pixelToSet<0?pixelValue:(pixelValue == 0?pixelValue:pixelToSet));
                 }
                 input.add((double) pixelValue);
             });
