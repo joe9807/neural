@@ -67,7 +67,7 @@ public class NeuralNetwork {
 
         int level = outputs.size();
         while (--level>0) {
-            neuronExecutor.calculateWeights(level, outputs.get(outputs.size()-level), deltas.get(level-1), parameters);
+            neuronExecutor.calculateWeights(level, outputs.get(outputs.size()-level), deltas.get(level-1), Double.parseDouble(parameters.getM()));
         }
 
         return deltas;
