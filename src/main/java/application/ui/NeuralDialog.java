@@ -83,8 +83,8 @@ public class NeuralDialog {
         createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                NeuralCreateDialog neuralCreateDialog = new NeuralCreateDialog(shell, neuralNetwork.getParameters());
-                switch (neuralCreateDialog.open()){
+                NeuralOpenDialog neuralOpenDialog = new NeuralOpenDialog(shell, neuralNetwork.getParameters());
+                switch (neuralOpenDialog.open()){
                     case 1: return;
                     case 2: {
                         neuralNetwork.saveWithName();

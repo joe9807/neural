@@ -13,10 +13,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class NeuralCreateDialog extends Dialog {
+public class NeuralOpenDialog extends Dialog {
     private final NeuralParameters parameters;
 
-    protected NeuralCreateDialog(Shell parentShell, NeuralParameters parameters) {
+    protected NeuralOpenDialog(Shell parentShell, NeuralParameters parameters) {
         super(parentShell);
         this.parameters = parameters;
     }
