@@ -10,6 +10,14 @@ public class NeuronWorker implements Runnable {
 
     @Override
     public void run() {
+        try{
+            calculate();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void calculate(){
         int index = 0;
         double v = 0;
         while (index != neuron.getWeights().size() || index != neuron.getInput().size()) {

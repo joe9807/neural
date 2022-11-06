@@ -37,7 +37,7 @@ public class NeuronExecutor {
             futures.add(executor.submit(new NeuronWeightWorker(weight, input, delta, m)));
         }
 
-        futures(futures);
+        while (futures.size() != 0) futures.removeIf(Future::isDone);
     }
 
     public List<Double> calculate(int level, List<Double> input, List<Double> delta){
@@ -61,24 +61,7 @@ public class NeuronExecutor {
             }
         }
 
-        futures(futures);
+        while (futures.size() != 0) futures.removeIf(Future::isDone);
         return neurons.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
-    }
-
-    private void futures(List<Future<?>> futures){
-        while (!futures.isEmpty()) {
-            List<Future<?>> remove = new ArrayList<>();
-            for (Future<?> future:futures){
-                if (future.isDone()){
-                    try {
-                        future.get();
-                        remove.add(future);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            futures.removeAll(remove);
-        }
     }
 }

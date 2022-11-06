@@ -9,6 +9,14 @@ public class NeuronBackWorker implements Runnable{
 
     @Override
     public void run() {
+       try{
+           calculate();
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+    }
+
+    private void calculate(){
         double inputK = neuron.getInput().get(neuron.getNumber());
         double delta = 0;
 
