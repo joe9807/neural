@@ -83,27 +83,37 @@ public class NeuralDialog {
         createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                NeuralOpenDialog neuralOpenDialog = new NeuralOpenDialog(shell, neuralNetwork.getParameters());
-                switch (neuralOpenDialog.open()){
+                NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork);
+                switch (neuralNetworkDialog.open()){
+                    case 0: {
+                        Date startDate = new Date();
+                        neuralNetwork.recreate();
+                        neuralNetwork.generateInput();
+                        System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+
+                        MessageDialog dialog = new MessageDialog(shell, "Question", null, "Neural Network "+ neuralNetwork.getParameters().getLevels()+" is created. Choose further action."
+                                , MessageDialog.QUESTION, new String[] {"Run", "Learn"}, 0);
+                        int result = dialog.open();
+                        if (result == 0) {
+                            runItem.notifyListeners(SWT.Selection, null);
+                        } else if (result == 1) {
+                            learnItem.notifyListeners(SWT.Selection, null);
+                        }
+                        break;
+                    }
                     case 1: return;
                     case 2: {
                         neuralNetwork.saveWithName();
                         return;
                     }
-                }
-
-                Date startDate = new Date();
-                neuralNetwork.recreate();
-                neuralNetwork.generateInput();
-                System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-
-                MessageDialog dialog = new MessageDialog(shell, "Question", null, "Neural Network "+ neuralNetwork.getParameters().getLevels()+" is created. Choose further action."
-                        , MessageDialog.QUESTION, new String[] {"Run", "Learn"}, 0);
-                int result = dialog.open();
-                if (result == 0) {
-                    runItem.notifyListeners(SWT.Selection, null);
-                } else if (result == 1) {
-                    learnItem.notifyListeners(SWT.Selection, null);
+                    case 3: {
+                        neuralNetwork.loadByName();
+                        return;
+                    }
+                    case 4: {
+                        neuralNetwork.deleteByName();
+                        return;
+                    }
                 }
             }
 

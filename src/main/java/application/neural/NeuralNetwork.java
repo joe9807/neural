@@ -1,6 +1,7 @@
 package application.neural;
 
 import application.repository.entity.Weight;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class NeuralNetwork {
     private NeuralParameters parameters;
 
     public void recreate(){
-        neuralRepository.deleteAll();
+        neuralRepository.deleteCurrent();
 
         final AtomicInteger prevCount = new AtomicInteger(0);
         final AtomicInteger levelNumber = new AtomicInteger(0);
@@ -34,11 +35,11 @@ public class NeuralNetwork {
             int neuronCount = Integer.parseInt(value);
             if (prevCount.get() == 0) {//input level is here
                 neuralRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number->
-                     new Weight(levelNumber.get(), number, 1.0, 0, null)
+                     new Weight(levelNumber.get(), number, 1.0, 0, StringUtils.EMPTY)
                 ).collect(Collectors.toList()));
             } else {//hidden and output levels are here
                 IntStream.range(0, neuronCount).forEach(number-> neuralRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(backNumber->
-                    new Weight(levelNumber.get(), number, Math.random()-0.5, backNumber, null)
+                    new Weight(levelNumber.get(), number, Math.random()-0.5, backNumber, StringUtils.EMPTY)
                 ).collect(Collectors.toList())));
             }
 
@@ -52,7 +53,24 @@ public class NeuralNetwork {
     }
 
     public void saveWithName(){
+        neuralRepository.deleteByName(parameters.getName());
         neuralRepository.saveWithName(parameters.getName());
+    }
+
+    public void loadByName(){
+        neuralRepository.deleteCurrent();
+        neuralRepository.loadByName(parameters.getName());
+    }
+
+    public void deleteByName(){
+        if (StringUtils.isNotEmpty(parameters.getName())) {
+            neuralRepository.deleteByName(parameters.getName());
+            parameters.setName(StringUtils.EMPTY);
+        }
+    }
+
+    public List<String> getAllNames(){
+        return neuralRepository.getAllNames();
     }
 
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){

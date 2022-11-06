@@ -2,12 +2,12 @@ package application.neural;
 
 import application.repository.WeightRepository;
 import application.repository.entity.Weight;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,8 +31,8 @@ public class NeuralRepository {
         weights.values().forEach(value-> weightRepository.saveAll(value));
     }
 
-    public void deleteAll(){
-        weightRepository.deleteAll();
+    public void deleteCurrent(){
+        weightRepository.deleteCurrent();
         weights = new HashMap<>();
     }
 
@@ -44,5 +44,18 @@ public class NeuralRepository {
         weights.values().forEach(level->{
             saveAll(level.stream().map(weight-> weight.clone(name)).collect(Collectors.toList()));
         });
+    }
+
+    public void loadByName(String name){
+        saveAll(weightRepository.findAllByName(name).stream().map(weight-> weight.clone(StringUtils.EMPTY)).collect(Collectors.toList()));
+    }
+
+    @Transactional
+    public void deleteByName(String name){
+        weightRepository.deleteByName(name);
+    }
+
+    public List<String> getAllNames(){
+        return weightRepository.getAllNames();
     }
 }
