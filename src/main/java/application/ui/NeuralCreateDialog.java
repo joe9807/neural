@@ -6,6 +6,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -23,17 +24,23 @@ public class NeuralCreateDialog extends Dialog {
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText("Neural Network Parameters");
+        newShell.setText("Neural Network");
     }
 
     @Override
     protected Point getInitialSize() {
-        return new Point(300, 200);
+        return new Point(400, 200);
     }
 
     protected Control createDialogArea(Composite parent) {
         Composite composite = (Composite) super.createDialogArea(parent);
         composite.setLayout(new GridLayout(2, false));
+
+        new Label(composite, SWT.NONE).setText("Name:");
+        Combo comboName = new Combo(composite, SWT.BORDER);
+        comboName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        comboName.setText(parameters.getName());
+        comboName.addModifyListener(e -> parameters.setName(((Combo)e.widget).getText()));
 
         new Label(composite, SWT.NONE).setText("Levels:");
         Text levelsText = new Text(composite, SWT.BORDER);
@@ -53,5 +60,20 @@ public class NeuralCreateDialog extends Dialog {
         mText.setText(String.valueOf(parameters.getM()));
         mText.addModifyListener(e -> parameters.setM(((Text)e.widget).getText()));
         return composite;
+    }
+
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        super.createButtonsForButtonBar(parent);
+        createButton(parent, 2, "Save", false);
+    }
+
+    protected void buttonPressed(int buttonId) {
+        super.buttonPressed(buttonId);
+
+        if (buttonId == 2) {
+            setReturnCode(buttonId);
+            close();
+        }
     }
 }

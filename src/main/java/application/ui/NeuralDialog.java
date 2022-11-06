@@ -79,12 +79,18 @@ public class NeuralDialog {
         Menu menu = new Menu(shell, SWT.NONE);
 
         createItem = new MenuItem(menu, SWT.NONE);
-        createItem.setText("Create Network");
+        createItem.setText("Open Network");
         createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 NeuralCreateDialog neuralCreateDialog = new NeuralCreateDialog(shell, neuralNetwork.getParameters());
-                if (neuralCreateDialog.open() != 0) return;
+                switch (neuralCreateDialog.open()){
+                    case 1: return;
+                    case 2: {
+                        neuralNetwork.saveWithName();
+                        return;
+                    }
+                }
 
                 Date startDate = new Date();
                 neuralNetwork.recreate();

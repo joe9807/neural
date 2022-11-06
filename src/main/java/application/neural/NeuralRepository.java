@@ -5,9 +5,12 @@ import application.repository.entity.Weight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class NeuralRepository {
@@ -35,5 +38,11 @@ public class NeuralRepository {
 
     public Iterable<Weight> saveAll(List<Weight> all){
         return weightRepository.saveAll(all);
+    }
+
+    public void saveWithName(String name){
+        weights.values().forEach(level->{
+            saveAll(level.stream().map(weight-> weight.clone(name)).collect(Collectors.toList()));
+        });
     }
 }

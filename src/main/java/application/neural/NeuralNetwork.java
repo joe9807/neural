@@ -34,11 +34,11 @@ public class NeuralNetwork {
             int neuronCount = Integer.parseInt(value);
             if (prevCount.get() == 0) {//input level is here
                 neuralRepository.saveAll(IntStream.range(0, neuronCount).mapToObj(number->
-                     new Weight(levelNumber.get(), number, 1.0, 0)
+                     new Weight(levelNumber.get(), number, 1.0, 0, null)
                 ).collect(Collectors.toList()));
             } else {//hidden and output levels are here
                 IntStream.range(0, neuronCount).forEach(number-> neuralRepository.saveAll(IntStream.range(0, prevCount.get()).mapToObj(backNumber->
-                    new Weight(levelNumber.get(), number, Math.random()-0.5, backNumber)
+                    new Weight(levelNumber.get(), number, Math.random()-0.5, backNumber, null)
                 ).collect(Collectors.toList())));
             }
 
@@ -49,6 +49,10 @@ public class NeuralNetwork {
 
     public void saveWeights() {
         neuralRepository.saveAll();
+    }
+
+    public void saveWithName(){
+        neuralRepository.saveWithName(parameters.getName());
     }
 
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){

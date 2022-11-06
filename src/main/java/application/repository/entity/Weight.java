@@ -13,7 +13,7 @@ import javax.persistence.Id;
 @NoArgsConstructor
 public class Weight implements Comparable<Weight>{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
     private int level;
@@ -24,15 +24,22 @@ public class Weight implements Comparable<Weight>{
 
     private double value;
 
-    public Weight(final int level, final int number, final double value, int backNumber){
+    private String name;
+
+    public Weight(final int level, final int number, final double value, int backNumber, String name){
         this.level = level;
         this.number = number;
         this.value = value;
         this.backNumber = backNumber;
+        this.name = name;
     }
 
     @Override
     public int compareTo(Weight o) {
         return Integer.compare(id, o.id);
+    }
+
+    public Weight clone(String name){
+        return new Weight(level, number, value, backNumber, name);
     }
 }
