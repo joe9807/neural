@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface WeightRepository extends CrudRepository<Weight, Integer> {
-    List<Weight> findAllByLevel(int level);
+    List<Weight> findAllByLevelAndName(int level, String name);
 
     void deleteByName(String name);
 
