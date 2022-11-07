@@ -21,8 +21,7 @@ public class NeuralRepository {
 
     List<Weight> findAllByLevel(int level){
         if (weights.get(level) == null){
-            List<Weight> result = weightRepository.findAllByLevelAndName(level, StringUtils.EMPTY);
-            if (result.size() != 0) weights.put(level, result);
+            weights.put(level, weightRepository.findAllByLevelAndName(level, StringUtils.EMPTY));
         }
 
         return weights.get(level);
