@@ -90,15 +90,6 @@ public class NeuralDialog {
                         neuralNetwork.recreate();
                         neuralNetwork.generateInput();
                         System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-
-                        MessageDialog dialog = new MessageDialog(shell, "Question", null, "Neural Network "+ neuralNetwork.getParameters().getLevels()+" is created. Choose further action."
-                                , MessageDialog.QUESTION, new String[] {"Run", "Learn"}, 0);
-                        int result = dialog.open();
-                        if (result == 0) {
-                            runItem.notifyListeners(SWT.Selection, null);
-                        } else if (result == 1) {
-                            learnItem.notifyListeners(SWT.Selection, null);
-                        }
                         break;
                     }
                     case 1: return;
@@ -114,6 +105,14 @@ public class NeuralDialog {
                         neuralNetwork.deleteByName();
                         return;
                     }
+                    case 5: {
+                        run();
+                        return;
+                    }
+                    case 6: {
+                        learn();
+                        return;
+                    }
                 }
             }
 
@@ -121,31 +120,6 @@ public class NeuralDialog {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        runItem = new MenuItem(menu, SWT.NONE);
-        runItem.setText("Run Network");
-        runItem.addSelectionListener(new SelectionListener() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                Date startDate = new Date();
-                run();
-                System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-            }
-
-            @Override
-            public void widgetDefaultSelected(SelectionEvent e) {}
-        });
-
-        learnItem = new MenuItem(menu, SWT.NONE);
-        learnItem.setText("Learn Network");
-        learnItem.addSelectionListener(new SelectionListener() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                learn();
-            }
-
-            @Override
-            public void widgetDefaultSelected(SelectionEvent e) {}
-        });
         label.setMenu(menu);
     }
 
@@ -177,6 +151,8 @@ public class NeuralDialog {
     }
 
     public void run(){
+        Date startDate = new Date();
+
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
                 new RGB(0, 255, 0), new RGB(255, 0, 0) }));
 
@@ -198,6 +174,8 @@ public class NeuralDialog {
         middleLabel.setImage(new Image(shell.getDisplay(), imageData));
         text.setText(scan.get());
         shell.layout();
+
+        System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
     private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){

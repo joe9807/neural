@@ -29,7 +29,7 @@ public class NeuralNetworkDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(450, 150);
+        return new Point(650, 150);
     }
 
     protected Control createDialogArea(Composite parent) {
@@ -68,12 +68,14 @@ public class NeuralNetworkDialog extends Dialog {
         createButton(parent, 2, "Save", false);
         createButton(parent, 3, "Load", false);
         createButton(parent, 4, "Delete", false);
+        createButton(parent, 5, "Run", false);
+        createButton(parent, 6, "Learn", false);
     }
 
     protected void buttonPressed(int buttonId) {
         super.buttonPressed(buttonId);
 
-        if (buttonId == 2 || buttonId == 3 || buttonId == 4) {
+        if (buttonId == 2 || buttonId == 3 || buttonId == 4 || buttonId == 5 || buttonId == 6) {
             setReturnCode(buttonId);
             close();
         }
