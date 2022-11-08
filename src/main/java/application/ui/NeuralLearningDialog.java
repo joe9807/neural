@@ -78,8 +78,9 @@ public class NeuralLearningDialog extends Dialog {
     public void step(Date startDate, NeuralNetwork neuralNetwork){
         progressSamples++;
 
-        if (progressSamples >= maxSamples) {
+        if (progressSamples == maxSamples) {
             progressEpoches++;
+            neuralNetwork.calculateErrors(maxSamples);
 
             if (progressEpoches == maxEpoch) {
                 neuralNetwork.saveWeights();

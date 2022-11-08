@@ -3,7 +3,6 @@ package application.ui;
 import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -47,9 +46,6 @@ public class NeuralDialog {
     private Image image;
     private Label middleLabel;
     private Text text;
-    private MenuItem runItem;
-    private MenuItem learnItem;
-    private MenuItem createItem;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
@@ -78,7 +74,7 @@ public class NeuralDialog {
     private void setMenu(Label label){
         Menu menu = new Menu(shell, SWT.NONE);
 
-        createItem = new MenuItem(menu, SWT.NONE);
+        MenuItem createItem = new MenuItem(menu, SWT.NONE);
         createItem.setText("Open Network");
         createItem.addSelectionListener(new SelectionListener() {
             @Override
@@ -111,7 +107,6 @@ public class NeuralDialog {
                     }
                     case 6: {
                         learn();
-                        return;
                     }
                 }
             }

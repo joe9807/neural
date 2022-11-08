@@ -26,7 +26,13 @@ public class NeuralNetwork {
     @Autowired
     private NeuralParameters parameters;
 
+    private List<Double> errorsS;
+
+    private List<Double> errors;
+
     public void recreate(){
+        errors = new ArrayList<>();
+        errorsS = new ArrayList<>();
         neuralRepository.deleteCurrent();
 
         final AtomicInteger prevCount = new AtomicInteger(0);
@@ -92,7 +98,25 @@ public class NeuralNetwork {
             neuronExecutor.calculateWeights(level, outputs.get(outputs.size()-level), deltas.get(level-1), Double.parseDouble(parameters.getM()));
         }
 
+        errorsS.add(calculateError(outputs.get(0), delta));
         return deltas;
+    }
+
+    public void calculateErrors(int sampleNumber){
+        errors.add(errorsS.stream().mapToDouble(Double::valueOf).sum()/sampleNumber);
+        errorsS = new ArrayList<>();
+    }
+
+    private double calculateError(List<Double> output, List<Double> delta){
+        int index = 0;
+        double error = 0;
+        while (index != output.size() || index != delta.size()) {
+            double d = output.get(index)-delta.get(index);
+            error+=d*d;
+            index++;
+        }
+
+        return error/index;
     }
 
     public void generateInput() {
@@ -117,5 +141,9 @@ public class NeuralNetwork {
 
     public NeuralParameters getParameters() {
         return parameters;
+    }
+
+    public List<Double> getErrors() {
+        return errors;
     }
 }
