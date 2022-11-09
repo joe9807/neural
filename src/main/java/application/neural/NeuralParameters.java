@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 public class NeuralParameters {
-    private String levels = "216;20;52";
+    private String levels = "240;20;52";
     private String name = "";
     private String epochesNumber = "150";
     private int samplesNumber;

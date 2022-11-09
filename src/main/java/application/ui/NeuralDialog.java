@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -35,8 +36,10 @@ import java.util.stream.IntStream;
 @Service
 public class NeuralDialog {
     private static final int WIDTH = 26*12;
-    private static final int HEIGHT = 400;
+    private static final int HEIGHT = 410;
     private static final int FONT_SIZE = 15;
+    private static final int ROWS = 20;
+    private static final int COLUMNS = 26;
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
@@ -45,7 +48,8 @@ public class NeuralDialog {
     private Shell shell;
     private Image image;
     private Label middleLabel;
-    private Text text;
+    private Text textImage;
+    private String text;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
@@ -58,9 +62,9 @@ public class NeuralDialog {
 
         Label leftLabel = new Label(shell, SWT.BORDER);
         middleLabel = new Label(shell, SWT.BORDER);
-        text = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
-        text.setLayoutData(new RowData(WIDTH, HEIGHT));
-        drawImage(leftLabel);
+        textImage = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
+        textImage.setLayoutData(new RowData(WIDTH, HEIGHT));
+        text = drawImage(leftLabel);
 
         setMenu(leftLabel);
         shell.open();
@@ -102,7 +106,7 @@ public class NeuralDialog {
                         return;
                     }
                     case 5: {
-                        run();
+                        run(text);
                         return;
                     }
                     case 6: {
@@ -145,29 +149,29 @@ public class NeuralDialog {
                 .collect(Collectors.toList())).collect(Collectors.toList());
     }
 
-    public void run(){
+    public void run(String text){
         Date startDate = new Date();
 
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
                 new RGB(0, 255, 0), new RGB(255, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
-        IntStream.range(0, ALPHABET.length()).forEach(index-> {
+        IntStream.range(0, COLUMNS*ROWS).forEach(index-> {
             List<Double> result = neuralNetwork.calculate(getInput(imageData, index, index, -1), null).stream().findFirst().orElse(null);
 
             int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
             String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
-            String shouldLetter = String.valueOf(ALPHABET.charAt(index));
+            String shouldLetter = String.valueOf(text.charAt(index));
 
             getInput(imageData, gotIndex, index, gotLetter.equals(shouldLetter)?2:3);
             scan.set(scan.get()+gotLetter);
-            if (scan.get().replaceAll("\n", "").length()%26 == 0) {
+            if (scan.get().replaceAll("\n", "").length()%COLUMNS == 0) {
                 scan.set(scan.get()+"\n");
             }
         });
 
         middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-        text.setText(scan.get());
+        textImage.setText(scan.get());
         shell.layout();
 
         System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
@@ -175,7 +179,7 @@ public class NeuralDialog {
 
     private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){
         int frameX = 12;
-        int frameY = FONT_SIZE + 3;
+        int frameY = FONT_SIZE + 5;
         int shiftFrameX = image.getImageData().width/frameX;
 
 
@@ -194,6 +198,7 @@ public class NeuralDialog {
                 int writeX = shiftWriteX*frameX + x;
                 int writeY = shiftWriteY+y+2;
 
+                System.out.println(readX+":"+readY);
                 int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
                     if (indexRead == indexWrite || readValue != 0){
@@ -207,19 +212,32 @@ public class NeuralDialog {
         return input;
     }
 
-    private void drawImage(Label label){
+    private String drawImage(Label label){
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         image = new Image(shell.getDisplay(), imageData);
         Font font = new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL);
         GC gcImage = new GC(image);
         gcImage.setFont(font);
-        gcImage.drawString(ALPHABET_UPPER_CASE, 0, 0);
-        gcImage.drawString(ALPHABET_LOWER_CASE, 0, FONT_SIZE + 3);
 
+        final StringBuilder builder = new StringBuilder();
+        IntStream.range(0, ROWS).forEach(row->{
+            String result = "";
+            if (row == 0) {
+                result = ALPHABET_UPPER_CASE;
+            } else if (row == 1) {
+                result = ALPHABET_LOWER_CASE;
+            } else {
+                result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52)) + "").collect(Collectors.joining());
+            }
+            builder.append(result);
+            gcImage.drawString(result, 0, (FONT_SIZE + 5)*row);
+        });
         label.setImage(image);
 
         ImageLoader saver = new ImageLoader();
         saver.data = new ImageData[] { image.getImageData() };
         saver.save(FILE_NAME, SWT.IMAGE_PNG);
+
+        return builder.toString();
     }
 }
