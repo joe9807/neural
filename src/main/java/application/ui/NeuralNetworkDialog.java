@@ -96,10 +96,6 @@ public class NeuralNetworkDialog extends Dialog {
             }
         }
         label.setImage(new Image(label.getDisplay(), imageData));
-
-        ImageLoader saver = new ImageLoader();
-        saver.data = new ImageData[] { imageData };
-        saver.save("error.png", SWT.IMAGE_PNG);
     }
 
     @Override
