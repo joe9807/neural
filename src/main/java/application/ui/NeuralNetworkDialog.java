@@ -5,7 +5,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -21,7 +20,7 @@ import org.eclipse.swt.widgets.Text;
 public class NeuralNetworkDialog extends Dialog {
     private static final int WEIGHT = 620;
     private static final int HEIGHT = 350;
-    private NeuralNetwork neuralNetwork;
+    private final NeuralNetwork neuralNetwork;
 
     protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork) {
         super(parentShell);
@@ -48,7 +47,7 @@ public class NeuralNetworkDialog extends Dialog {
         Combo comboName = new Combo(composite, SWT.BORDER);
         comboName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         comboName.addModifyListener(e -> neuralNetwork.getParameters().setName(((Combo)e.widget).getText()));
-        neuralNetwork.getAllNames().stream().forEach(comboName::add);
+        neuralNetwork.getAllNames().forEach(comboName::add);
 
         new Label(composite, SWT.NONE).setText("Levels:");
         Text levelsText = new Text(composite, SWT.BORDER);
