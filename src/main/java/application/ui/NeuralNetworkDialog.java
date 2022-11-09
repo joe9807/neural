@@ -5,6 +5,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -17,9 +18,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import java.util.stream.IntStream;
-
 public class NeuralNetworkDialog extends Dialog {
+    private static final int WEIGHT = 620;
+    private static final int HEIGHT = 350;
     private NeuralNetwork neuralNetwork;
 
     protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork) {
@@ -35,7 +36,7 @@ public class NeuralNetworkDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(620, 350);
+        return new Point(WEIGHT, HEIGHT);
     }
 
     protected Control createDialogArea(Composite parent) {
@@ -79,20 +80,26 @@ public class NeuralNetworkDialog extends Dialog {
     public void drawErrors(Label label){
         if (neuralNetwork.getErrors() == null || neuralNetwork.getErrors().size() == 0) return;
 
-        double xScale = label.getBounds().width/ (double) neuralNetwork.getErrors().size();
+        ImageData imageData = new ImageData(590, 190, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
+
+        double xScale = imageData.width/ (double) neuralNetwork.getErrors().size();
         double min = neuralNetwork.getErrors().stream().min(Double::compareTo).get();
         double max = neuralNetwork.getErrors().stream().max(Double::compareTo).get();
-        double yScale = label.getBounds().height/(max-min);
-        ImageData imageData = new ImageData(label.getBounds().width, label.getBounds().height, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
+        double yScale = (imageData.height-1)/(max-min);
+
         int index = 0;
         for (Double error:neuralNetwork.getErrors()) {
             int x = (int)(index++*xScale);
-            int y = (int)((error-min)*yScale);
+            int y = imageData.height-1-(int)((error-min)*yScale);
             if (x>=0 && x<imageData.width && y>=0 && y<imageData.height) {
                 imageData.setPixel(x, y, 1);
             }
         }
-        label.setImage(new Image(getShell().getDisplay(), imageData));
+        label.setImage(new Image(label.getDisplay(), imageData));
+
+        ImageLoader saver = new ImageLoader();
+        saver.data = new ImageData[] { imageData };
+        saver.save("error.png", SWT.IMAGE_PNG);
     }
 
     @Override
