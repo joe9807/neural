@@ -198,7 +198,6 @@ public class NeuralDialog {
                 int writeX = shiftWriteX*frameX + x;
                 int writeY = shiftWriteY+y+2;
 
-                System.out.println(readX+":"+readY);
                 int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
                     if (indexRead == indexWrite || readValue != 0){
