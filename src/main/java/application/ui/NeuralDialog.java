@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -123,14 +124,17 @@ public class NeuralDialog {
                 new RGB(0, 255, 0), new RGB(255, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
+        final AtomicInteger count = new AtomicInteger(text.length());
         IntStream.range(0, COLUMNS*ROWS).forEach(index-> {
             List<Double> result = neuralNetwork.calculate(getInput(imageData, index, index, -1), null).stream().findFirst().orElse(null);
 
             int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
             String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
             String shouldLetter = String.valueOf(text.charAt(index));
+            boolean correct = gotLetter.equals(shouldLetter);
+            if (correct) count.getAndDecrement();
 
-            getInput(imageData, gotIndex, index, gotLetter.equals(shouldLetter)?2:3);
+            getInput(imageData, gotIndex, index, correct?2:3);
             scan.set(scan.get()+gotLetter);
             if (scan.get().replaceAll("\n", "").length()%COLUMNS == 0) {
                 scan.set(scan.get()+"\n");
@@ -138,7 +142,7 @@ public class NeuralDialog {
         });
 
         middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-        textImage.setText(scan.get());
+        textImage.setText(scan.get()+"\n"+(text.length()-count.get())+" of "+text.length()+" characters were properly detected");
         shell.layout();
 
         System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
@@ -195,11 +199,14 @@ public class NeuralDialog {
             } else if (row == 1) {
                 result = ALPHABET_LOWER_CASE;
             } else {
-                gcImage.setFont(new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL));
                 result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52)) + "").collect(Collectors.joining());
             }
             builder.append(result);
             gcImage.drawString(result, 0, (FONT_SIZE + 5)*row);
+
+            if (row>1) {
+                randomDots(gcImage, imageData.width, row);
+            }
         });
         label.setImage(image);
 
@@ -208,5 +215,15 @@ public class NeuralDialog {
         saver.save(FILE_NAME, SWT.IMAGE_PNG);
 
         return builder.toString();
+    }
+
+    private void randomDots(GC gc, int width, int row){
+        IntStream.range(0, width).forEach(x->{
+            IntStream.range((FONT_SIZE + 5)*row, (FONT_SIZE + 5)*(row+1)).forEach(y->{
+                if (Math.random()<0.05) {
+                    gc.drawRectangle(x, y, 1, 1);
+                }
+            });
+        });
     }
 }
