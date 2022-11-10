@@ -18,20 +18,16 @@ import java.util.stream.IntStream;
 
 public class NeuralLearningDialog {
     private ProgressBar progressBarEpoch;
-    private final int maxEpoch;
-    private final int maxSamples;
     private int progressSamples;
     private int progressEpoches;
     private final NeuralNetwork neuralNetwork;
     private Date startDate;
     private Button learnButton;
     private final List<List<Double>> inputs;
-    private Runnable updateLabel;
+    private final Runnable updateLabel;
 
     protected NeuralLearningDialog(NeuralNetwork neuralNetwork, List<List<Double>> inputs, Runnable updateLabel) {
         this.neuralNetwork = neuralNetwork;
-        this.maxEpoch = Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber());
-        this.maxSamples = neuralNetwork.getLearnText().length();
         this.inputs = inputs;
         this.updateLabel = updateLabel;
     }
@@ -39,7 +35,6 @@ public class NeuralLearningDialog {
     public void draw(Composite parent) {
         progressBarEpoch = new ProgressBar(parent, SWT.SMOOTH);
         progressBarEpoch.setSelection(0);
-        progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
         progressBarEpoch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         learnButton = new Button(parent, SWT.PUSH);
@@ -52,7 +47,7 @@ public class NeuralLearningDialog {
                     learnButton.setText("Stop");
                     progressSamples = 0;
                     progressEpoches = 0;
-                    learn(neuralNetwork.getLearnText());
+                    learn();
                 } else {
                     stop();
                 }
@@ -63,11 +58,12 @@ public class NeuralLearningDialog {
         });
     }
 
-    public void learn(String learnText){
-        List<List<Double>> deltas = getDeltas(learnText);
+    public void learn(){
+        progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
+        List<List<Double>> deltas = getDeltas(neuralNetwork.getLearnText());
 
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
-            IntStream.range(0, learnText.length()).forEach(index-> {
+            IntStream.range(0, neuralNetwork.getLearnText().length()).forEach(index-> {
                 Display.getDefault().asyncExec(()->{
                     if (learnButton.getText().equalsIgnoreCase("Stop")) {
                         neuralNetwork.calculate(inputs.get(index), deltas.get(index));
@@ -86,11 +82,11 @@ public class NeuralLearningDialog {
     public void step(NeuralNetwork neuralNetwork){
         progressSamples++;
 
-        if (progressSamples == maxSamples) {
+        if (progressSamples == neuralNetwork.getLearnText().length()) {
             progressEpoches++;
-            neuralNetwork.calculateErrors(maxSamples);
+            neuralNetwork.calculateErrors(neuralNetwork.getLearnText().length());
 
-            if (progressEpoches == maxEpoch) {
+            if (progressEpoches == Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())) {
                 stop();
             } else {
                 progressSamples = 0;

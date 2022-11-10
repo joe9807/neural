@@ -149,7 +149,6 @@ public class NeuralDialog {
         int frameY = FONT_SIZE + 5;
         int shiftFrameX = image.getImageData().width/frameX;
 
-
         int shiftReadY = frameY*(indexRead / shiftFrameX);
         int shiftReadX = indexRead % shiftFrameX;
 
@@ -167,8 +166,12 @@ public class NeuralDialog {
 
                 int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
-                    if (indexRead == indexWrite || readValue != 0){
-                        imageData.setPixel(writeX, writeY, pixelToSet<0?readValue:(readValue==1?pixelToSet:0));
+                    if (indexRead == indexWrite || readValue != 0) {
+                        imageData.setPixel(writeX, writeY, pixelToSet < 0 ? readValue : (readValue == 1 ? pixelToSet : 0));
+                    }
+
+                    if (x == 0 || y == 0) {
+                        imageData.setPixel(writeX, writeY, 1);
                     }
                 }
                 input.add((double) readValue);
@@ -192,6 +195,7 @@ public class NeuralDialog {
             } else if (row == 1) {
                 result = ALPHABET_LOWER_CASE;
             } else {
+                gcImage.setFont(new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL));
                 result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52)) + "").collect(Collectors.joining());
             }
             builder.append(result);
