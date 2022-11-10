@@ -1,8 +1,11 @@
 package application.ui;
 
 import application.neural.NeuralNetwork;
+import application.utils.Utils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
@@ -17,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import java.util.Date;
 import java.util.List;
 
 public class NeuralNetworkDialog extends Dialog {
@@ -90,13 +94,13 @@ public class NeuralNetworkDialog extends Dialog {
     }
 
     public void drawErrors(){
-        if (neuralNetwork.getErrors() == null || neuralNetwork.getErrors().size() == 0) return;
+        if (neuralNetwork.getErrors() == null) return;
 
         ImageData imageData = new ImageData(490, 150, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
 
         double xScale = imageData.width/ (double) neuralNetwork.getErrors().size();
-        double min = neuralNetwork.getErrors().stream().min(Double::compareTo).get();
-        double max = neuralNetwork.getErrors().stream().max(Double::compareTo).get();
+        double min = neuralNetwork.getErrors().stream().min(Double::compareTo).orElse(0.0);
+        double max = neuralNetwork.getErrors().stream().max(Double::compareTo).orElse(1.0);
         double yScale = (imageData.height-1)/(max-min);
 
         int index = 0;
@@ -112,7 +116,19 @@ public class NeuralNetworkDialog extends Dialog {
 
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
-        createButton(parent, 0, "Create", true);
+        createButton(parent, 7, "Create", true).addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Date startDate = new Date();
+                neuralNetwork.recreate();
+                neuralNetwork.generateInput();
+                drawErrors();
+                System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {}
+        });
         createButton(parent, 2, "Save", false);
         createButton(parent, 3, "Load", false);
         createButton(parent, 4, "Delete", false);

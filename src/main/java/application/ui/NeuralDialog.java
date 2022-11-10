@@ -86,14 +86,7 @@ public class NeuralDialog {
             public void widgetSelected(SelectionEvent e) {
                 NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork, getInputs());
                 switch (neuralNetworkDialog.open()){
-                    case 0: {
-                        Date startDate = new Date();
-                        neuralNetwork.recreate();
-                        neuralNetwork.generateInput();
-                        System.out.printf("=============== Network Create took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
-                        break;
-                    }
-                    case 1: return;
+                     case 1: return;
                     case 2: {
                         neuralNetwork.saveWithName();
                         return;
