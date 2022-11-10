@@ -44,7 +44,8 @@ public class NeuralDialog {
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
-    private static final String FILE_NAME = "text.png";
+    private static final String FILE_NAME_INPUT = "input.png";
+    private static final String FILE_NAME_OUTPUT = "output.png";
 
     private Shell shell;
     private Image image;
@@ -145,6 +146,10 @@ public class NeuralDialog {
         textImage.setText(scan.get()+"\n"+(text.length()-count.get())+" of "+text.length()+" characters were properly detected");
         shell.layout();
 
+        ImageLoader saver = new ImageLoader();
+        saver.data = new ImageData[] { imageData };
+        saver.save(FILE_NAME_OUTPUT, SWT.IMAGE_PNG);
+
         System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
@@ -212,7 +217,7 @@ public class NeuralDialog {
 
         ImageLoader saver = new ImageLoader();
         saver.data = new ImageData[] { image.getImageData() };
-        saver.save(FILE_NAME, SWT.IMAGE_PNG);
+        saver.save(FILE_NAME_INPUT, SWT.IMAGE_PNG);
 
         return builder.toString();
     }
