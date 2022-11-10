@@ -65,6 +65,7 @@ public class NeuralDialog {
         textImage = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
         textImage.setLayoutData(new RowData(WIDTH, HEIGHT));
         text = drawImage(leftLabel);
+        neuralNetwork.setLearnText(ALPHABET);
 
         setMenu(leftLabel);
         shell.open();
@@ -83,7 +84,7 @@ public class NeuralDialog {
         createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork);
+                NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork, getInputs());
                 switch (neuralNetworkDialog.open()){
                     case 0: {
                         Date startDate = new Date();
@@ -107,10 +108,6 @@ public class NeuralDialog {
                     }
                     case 5: {
                         run(text);
-                        return;
-                    }
-                    case 6: {
-                        learn();
                     }
                 }
             }
@@ -122,31 +119,15 @@ public class NeuralDialog {
         label.setMenu(menu);
     }
 
-    public void learn(){
-        Date startDate = new Date();
-
-        neuralNetwork.getParameters().setSamplesNumber(ALPHABET.length());
-        NeuralLearningDialog neuralLearningDialog = new NeuralLearningDialog(shell, neuralNetwork);
-        neuralLearningDialog.setBlockOnOpen(false);
-        neuralLearningDialog.open();
-
-        List<List<Double>> deltas = getDeltas();
-
-        IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
-            IntStream.range(0, ALPHABET.length()).forEach(index-> {
-                Display.getDefault().asyncExec(()->{
-                    if (neuralLearningDialog.getReturnCode() != 1) {
-                        neuralNetwork.calculate(getInput(null, index, index, -1), deltas.get(index));
-                        neuralLearningDialog.step(startDate, neuralNetwork);
-                    }
-                });
-            });
+    public List<List<Double>> getInputs(){
+        List<List<Double>> inputs = new ArrayList<>();
+        IntStream.range(0, ALPHABET.length()).forEach(index-> {
+            //Display.getDefault().asyncExec(()->{
+                inputs.add(getInput(null, index, index, -1));
+            //});
         });
-    }
 
-    private List<List<Double>> getDeltas(){
-        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> IntStream.range(0, ALPHABET.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0)
-                .collect(Collectors.toList())).collect(Collectors.toList());
+        return inputs;
     }
 
     public void run(String text){
@@ -214,9 +195,8 @@ public class NeuralDialog {
     private String drawImage(Label label){
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         image = new Image(shell.getDisplay(), imageData);
-        Font font = new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL);
         GC gcImage = new GC(image);
-        gcImage.setFont(font);
+        gcImage.setFont(new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL));
 
         final StringBuilder builder = new StringBuilder();
         IntStream.range(0, ROWS).forEach(row->{

@@ -17,14 +17,19 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import java.util.List;
+
 public class NeuralNetworkDialog extends Dialog {
-    private static final int WEIGHT = 620;
+    private static final int WEIGHT = 520;
     private static final int HEIGHT = 350;
     private final NeuralNetwork neuralNetwork;
+    private List<List<Double>> inputs;
+    private Label labelError;
 
-    protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork) {
+    protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, List<List<Double>> inputs) {
         super(parentShell);
         this.neuralNetwork = neuralNetwork;
+        this.inputs = inputs;
     }
 
     @Override
@@ -67,19 +72,27 @@ public class NeuralNetworkDialog extends Dialog {
         mText.setText(String.valueOf(neuralNetwork.getParameters().getM()));
         mText.addModifyListener(e -> neuralNetwork.getParameters().setM(((Text)e.widget).getText()));
 
-        Label labelError = new Label(composite, SWT.BORDER);
+        labelError = new Label(composite, SWT.BORDER);
         labelError.setLayoutData(new GridData(GridData.FILL_BOTH));
         ((GridData)labelError.getLayoutData()).horizontalSpan=columnsNumber;
 
         getShell().layout();
-        drawErrors(labelError);
+        drawErrors();
+
+        Composite learningComposite = new Composite(composite, SWT.NONE);
+        learningComposite.setLayout(new GridLayout(2, false));
+        learningComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        ((GridData)learningComposite.getLayoutData()).horizontalSpan=columnsNumber;
+
+        NeuralLearningDialog learningControl = new NeuralLearningDialog(neuralNetwork, inputs, this::drawErrors);
+        learningControl.draw(learningComposite);
         return composite;
     }
 
-    public void drawErrors(Label label){
+    public void drawErrors(){
         if (neuralNetwork.getErrors() == null || neuralNetwork.getErrors().size() == 0) return;
 
-        ImageData imageData = new ImageData(590, 190, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
+        ImageData imageData = new ImageData(490, 150, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
 
         double xScale = imageData.width/ (double) neuralNetwork.getErrors().size();
         double min = neuralNetwork.getErrors().stream().min(Double::compareTo).get();
@@ -94,7 +107,7 @@ public class NeuralNetworkDialog extends Dialog {
                 imageData.setPixel(x, y, 1);
             }
         }
-        label.setImage(new Image(label.getDisplay(), imageData));
+        labelError.setImage(new Image(labelError.getDisplay(), imageData));
     }
 
     @Override
@@ -104,7 +117,6 @@ public class NeuralNetworkDialog extends Dialog {
         createButton(parent, 3, "Load", false);
         createButton(parent, 4, "Delete", false);
         createButton(parent, 5, "Run", false);
-        createButton(parent, 6, "Learn", false);
     }
 
     protected void buttonPressed(int buttonId) {

@@ -2,80 +2,88 @@ package application.ui;
 
 import application.neural.NeuralNetwork;
 import application.utils.Utils;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ProgressBar;
-import org.eclipse.swt.widgets.Shell;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class NeuralLearningDialog extends Dialog {
+public class NeuralLearningDialog {
     private ProgressBar progressBarEpoch;
-    private Label result;
     private final int maxEpoch;
     private final int maxSamples;
     private int progressSamples;
     private int progressEpoches;
     private final NeuralNetwork neuralNetwork;
+    private Date startDate;
+    private Button learnButton;
+    private final List<List<Double>> inputs;
+    private Runnable updateLabel;
 
-    protected NeuralLearningDialog(Shell parentShell, NeuralNetwork neuralNetwork) {
-        super(parentShell);
+    protected NeuralLearningDialog(NeuralNetwork neuralNetwork, List<List<Double>> inputs, Runnable updateLabel) {
         this.neuralNetwork = neuralNetwork;
         this.maxEpoch = Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber());
-        this.maxSamples = neuralNetwork.getParameters().getSamplesNumber();
+        this.maxSamples = neuralNetwork.getLearnText().length();
+        this.inputs = inputs;
+        this.updateLabel = updateLabel;
     }
 
-    @Override
-    protected void configureShell(Shell newShell) {
-        super.configureShell(newShell);
-        newShell.setText("Learning Dialog");
-    }
-
-    @Override
-    protected Point getInitialSize() {
-        return new Point(350, 200);
-    }
-
-    protected Control createDialogArea(Composite parent) {
-        Composite composite = (Composite)super.createDialogArea(parent);
-        composite.setLayout(new GridLayout(1, false));
-
-        progressBarEpoch = new ProgressBar(composite, SWT.SMOOTH);
+    public void draw(Composite parent) {
+        progressBarEpoch = new ProgressBar(parent, SWT.SMOOTH);
         progressBarEpoch.setSelection(0);
         progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
         progressBarEpoch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        result = new Label(composite, SWT.NONE);
-        result.setLayoutData(new GridData());
-        result.setText(neuralNetwork.getParameters().toString());
+        learnButton = new Button(parent, SWT.PUSH);
+        learnButton.setText("Learn");
+        learnButton.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (learnButton.getText().equalsIgnoreCase("Learn")) {
+                    startDate = new Date();
+                    learnButton.setText("Stop");
+                    progressSamples = 0;
+                    progressEpoches = 0;
+                    learn(neuralNetwork.getLearnText());
+                } else {
+                    stop();
+                }
+            }
 
-        progressBarEpoch.addPaintListener(e -> {
-            String string = String.format("Epoches: %3s; Samples: %3s", maxEpoch-progressEpoches, maxSamples-progressSamples);
-
-            Point point = progressBarEpoch.getSize();
-            Font font = new Font(getParentShell().getDisplay(), "Tahoma", 8, SWT.NORMAL);
-            e.gc.setFont(font);
-            e.gc.setForeground(getParentShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
-
-            FontMetrics fontMetrics = e.gc.getFontMetrics();
-            int stringWidth = fontMetrics.getAverageCharWidth() * string.length();
-            int stringHeight = fontMetrics.getHeight();
-
-            e.gc.drawString(string, (point.x-stringWidth)/2 , (point.y-stringHeight)/2, true);
-            font.dispose();
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {}
         });
-        return composite;
     }
 
-    public void step(Date startDate, NeuralNetwork neuralNetwork){
+    public void learn(String learnText){
+        List<List<Double>> deltas = getDeltas(learnText);
+
+        IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
+            IntStream.range(0, learnText.length()).forEach(index-> {
+                Display.getDefault().asyncExec(()->{
+                    if (learnButton.getText().equalsIgnoreCase("Stop")) {
+                        neuralNetwork.calculate(inputs.get(index), deltas.get(index));
+                        step(neuralNetwork);
+                    }
+                });
+            });
+        });
+    }
+
+    private List<List<Double>> getDeltas(String learnText){
+        return IntStream.range(0, learnText.length()).mapToObj(index-> IntStream.range(0, learnText.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0)
+                .collect(Collectors.toList())).collect(Collectors.toList());
+    }
+
+    public void step(NeuralNetwork neuralNetwork){
         progressSamples++;
 
         if (progressSamples == maxSamples) {
@@ -83,17 +91,21 @@ public class NeuralLearningDialog extends Dialog {
             neuralNetwork.calculateErrors(maxSamples);
 
             if (progressEpoches == maxEpoch) {
-                neuralNetwork.saveWeights();
-
-                String elapsed = Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
-                result.setText("Network has learned. Time elapsed: "+elapsed);
-                result.update();
-                System.out.println("=============== Network Learn took: "+elapsed);
+                stop();
             } else {
                 progressSamples = 0;
             }
         }
 
         progressBarEpoch.setSelection(progressEpoches);
+    }
+
+    public void stop(){
+        learnButton.setText("Learn");
+        neuralNetwork.saveWeights();
+        String elapsed = Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
+        String string = "Network has learned. Time elapsed: "+elapsed;
+        System.out.println(string);
+        updateLabel.run();
     }
 }

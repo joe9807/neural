@@ -9,7 +9,6 @@ public class NeuralParameters {
     private String levels = "240;20;52";
     private String name = "";
     private String epochesNumber = "150";
-    private int samplesNumber;
     private String m = "0.4";
 
     public int getOutputCount(){
@@ -18,6 +17,6 @@ public class NeuralParameters {
     }
 
     public String toString(){
-        return String.format("Levels: %s; Max Epoches: %s; Max Samples: %s; M: %s", levels, epochesNumber, samplesNumber, m);
+        return String.format("Levels: %s; Max Epoches: %s; M: %s", levels, epochesNumber, m);
     }
 }

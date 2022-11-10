@@ -30,6 +30,8 @@ public class NeuralNetwork {
 
     private List<Double> errors;
 
+    private String learnText;
+
     public void recreate(){
         errors = new ArrayList<>();
         errorsS = new ArrayList<>();
@@ -145,5 +147,14 @@ public class NeuralNetwork {
 
     public List<Double> getErrors() {
         return errors;
+    }
+
+
+    public String getLearnText() {
+        return learnText;
+    }
+
+    public void setLearnText(String learnText) {
+        this.learnText = learnText;
     }
 }
