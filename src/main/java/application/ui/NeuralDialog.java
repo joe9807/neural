@@ -113,14 +113,7 @@ public class NeuralDialog {
     }
 
     public List<List<Double>> getInputs(){
-        List<List<Double>> inputs = new ArrayList<>();
-        IntStream.range(0, ALPHABET.length()).forEach(index-> {
-            //Display.getDefault().asyncExec(()->{
-                inputs.add(getInput(null, index, index, -1));
-            //});
-        });
-
-        return inputs;
+        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> getInput(null, index, index, -1)).collect(Collectors.toList());
     }
 
     public void run(String text){
