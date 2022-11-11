@@ -1,14 +1,15 @@
 package application.neural;
 
+import application.ui.NeuralDialog;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Data
 @Component
 public class NeuralParameters {
-    private String levels = "240;20;52";
+    private String levels = NeuralDialog.INPUT_SIZE+";20;52";
     private String name = "";
-    private String epochesNumber = "150";
+    private String epochesNumber = "300";
     private String m = "0.4";
 
     public int getOutputCount(){

@@ -36,16 +36,17 @@ import java.util.stream.IntStream;
 
 @Service
 public class NeuralDialog {
-    private static final int WIDTH = 26*12;
-    private static final int HEIGHT = 410;
     private static final int FONT_SIZE = 15;
     private static final int ROWS = 20;
     private static final int COLUMNS = 26;
+    private static final int WIDTH = COLUMNS*(FONT_SIZE-3);
+    private static final int HEIGHT = ROWS*(FONT_SIZE+5)+10;
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
     private static final String FILE_NAME_INPUT = "input.png";
     private static final String FILE_NAME_OUTPUT = "output.png";
+    public static final int INPUT_SIZE = (FONT_SIZE+5)*(FONT_SIZE-3);
 
     private Shell shell;
     private Image image;
@@ -60,7 +61,7 @@ public class NeuralDialog {
         shell = new Shell(new Display(), SWT.CLOSE);
         shell.setLayout(new RowLayout());
         shell.setText("Neural Network");
-        shell.setSize(new Point(WIDTH*3+45, HEIGHT+50));
+        shell.setSize(new Point(WIDTH*3+50, HEIGHT+50));
 
         Label leftLabel = new Label(shell, SWT.BORDER);
         middleLabel = new Label(shell, SWT.BORDER);
@@ -155,7 +156,7 @@ public class NeuralDialog {
     }
 
     private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){
-        int frameX = 12;
+        int frameX = FONT_SIZE - 3;
         int frameY = FONT_SIZE + 5;
         int shiftFrameX = image.getImageData().width/frameX;
 
