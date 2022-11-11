@@ -122,7 +122,7 @@ public class NeuralDialog {
         Date startDate = new Date();
 
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
-                new RGB(0, 255, 0), new RGB(255, 0, 0) }));
+                new RGB(0, 150, 0), new RGB(255, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         final AtomicInteger count = new AtomicInteger(text.length());
