@@ -168,10 +168,10 @@ public class NeuralDialog {
         IntStream.range(0, frameX).forEach(x->{
             IntStream.range(0, frameY).forEach(y->{
                 int readX = shiftReadX*frameX + x;
-                int readY = shiftReadY+y+2;
+                int readY = shiftReadY+y;
 
                 int writeX = shiftWriteX*frameX + x;
-                int writeY = shiftWriteY+y+2;
+                int writeY = shiftWriteY+y;
 
                 int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
