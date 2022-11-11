@@ -53,11 +53,14 @@ public class NeuralDialog {
     private Label middleLabel;
     private Text textImage;
     private String text;
+    private double noise;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
 
-    public void init(){
+    public void init(double noise){
+        this.noise = noise;
+
         shell = new Shell(new Display(), SWT.CLOSE);
         shell.setLayout(new RowLayout());
         shell.setText("Neural Network");
@@ -227,7 +230,7 @@ public class NeuralDialog {
     private void randomDots(GC gc, int width, int row){
         IntStream.range(0, width).forEach(x->{
             IntStream.range((FONT_SIZE + 5)*row, (FONT_SIZE + 5)*(row+1)).forEach(y->{
-                if (Math.random()<0.01) {
+                if (Math.random()<noise) {
                     gc.drawRectangle(x, y, 1, 1);
                 }
             });

@@ -13,8 +13,8 @@ public class NeuralController {
 
     @Operation(summary = "Запустить Тестовый Neural UI")
     @GetMapping("ui")
-    public String showUI(){
-        new Thread(() -> neuralDialog.init()).start();
+    public String showUI(double noise){
+        new Thread(() -> neuralDialog.init(noise)).start();
         return "Neural UI has started in separated window.";
     }
 }
