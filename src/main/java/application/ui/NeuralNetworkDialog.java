@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -98,13 +99,16 @@ public class NeuralNetworkDialog extends Dialog {
 
         ImageData imageData = new ImageData(490, 150, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
 
-        double xScale = imageData.width/ (double) neuralNetwork.getErrors().size();
-        double min = neuralNetwork.getErrors().stream().min(Double::compareTo).orElse(0.0);
-        double max = neuralNetwork.getErrors().stream().max(Double::compareTo).orElse(1.0);
+        List<Double> errors = new ArrayList<>(neuralNetwork.getErrors());
+        if (errors.size() != 0) errors.remove(0);
+
+        double xScale = imageData.width/ (double) errors.size();
+        double min = errors.stream().min(Double::compareTo).orElse(0.0);
+        double max = errors.stream().max(Double::compareTo).orElse(1.0);
         double yScale = (imageData.height-1)/(max-min);
 
         int index = 0;
-        for (Double error:neuralNetwork.getErrors()) {
+        for (Double error:errors) {
             int x = (int)(index++*xScale);
             int y = imageData.height-1-(int)((error-min)*yScale);
             if (x>=0 && x<imageData.width && y>=0 && y<imageData.height) {
