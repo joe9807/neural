@@ -65,7 +65,7 @@ public class NeuralLearningControl {
 
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
             IntStream.range(0, neuralNetwork.getLearnText().length()).forEach(index-> {
-                Display.getDefault().asyncExec(()->{
+                Display.getCurrent().asyncExec(()->{
                     if (learnButton.getText().equalsIgnoreCase("Stop")) {
                         neuralNetwork.calculate(inputs.get(index), deltas.get(index));
                         step(neuralNetwork);
