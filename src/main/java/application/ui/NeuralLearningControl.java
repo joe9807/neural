@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class NeuralLearningDialog {
+public class NeuralLearningControl {
     private ProgressBar progressBarEpoch;
     private int progressSamples;
     private int progressEpoches;
@@ -26,7 +26,7 @@ public class NeuralLearningDialog {
     private final List<List<Double>> inputs;
     private final Runnable updateLabel;
 
-    protected NeuralLearningDialog(NeuralNetwork neuralNetwork, List<List<Double>> inputs, Runnable updateLabel) {
+    protected NeuralLearningControl(NeuralNetwork neuralNetwork, List<List<Double>> inputs, Runnable updateLabel) {
         this.neuralNetwork = neuralNetwork;
         this.inputs = inputs;
         this.updateLabel = updateLabel;

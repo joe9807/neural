@@ -88,7 +88,7 @@ public class NeuralNetworkDialog extends Dialog {
         learningComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         ((GridData)learningComposite.getLayoutData()).horizontalSpan=columnsNumber;
 
-        NeuralLearningDialog learningControl = new NeuralLearningDialog(neuralNetwork, inputs, this::drawErrors);
+        NeuralLearningControl learningControl = new NeuralLearningControl(neuralNetwork, inputs, this::drawErrors);
         learningControl.draw(learningComposite);
         return composite;
     }
