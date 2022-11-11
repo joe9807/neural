@@ -32,9 +32,13 @@ public class NeuralNetwork {
 
     private String learnText;
 
-    public void recreate(){
+    public void resetErrors(){
         errors = new ArrayList<>();
         errorsS = new ArrayList<>();
+    }
+
+    public void recreate(){
+        resetErrors();
         neuralRepository.deleteCurrent();
 
         final AtomicInteger prevCount = new AtomicInteger(0);

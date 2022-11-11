@@ -59,6 +59,7 @@ public class NeuralLearningControl {
     }
 
     public void learn(){
+        neuralNetwork.resetErrors();
         progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
         List<List<Double>> deltas = getDeltas(neuralNetwork.getLearnText());
 

@@ -128,7 +128,7 @@ public class NeuralDialog {
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         final AtomicInteger count = new AtomicInteger(text.length());
         IntStream.range(0, COLUMNS*ROWS).forEach(index-> {
-            List<Double> result = neuralNetwork.calculate(getInput(imageData, index, index, -1), null).stream().findFirst().orElse(null);
+            List<Double> result = neuralNetwork.calculate(getInput(null, index, index, -1), null).stream().findFirst().orElse(null);
 
             int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
             String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
@@ -227,7 +227,7 @@ public class NeuralDialog {
     private void randomDots(GC gc, int width, int row){
         IntStream.range(0, width).forEach(x->{
             IntStream.range((FONT_SIZE + 5)*row, (FONT_SIZE + 5)*(row+1)).forEach(y->{
-                if (Math.random()<0.05) {
+                if (Math.random()<0.01) {
                     gc.drawRectangle(x, y, 1, 1);
                 }
             });
