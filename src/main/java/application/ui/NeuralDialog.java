@@ -143,7 +143,8 @@ public class NeuralDialog {
         });
 
         middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-        textImage.setText(scan.get()+"\n"+(text.length()-count.get())+" of "+text.length()+" characters were properly detected");
+        int detected = (text.length()-count.get());
+        textImage.setText(scan.get()+"\n"+detected+" of "+text.length()+" characters were properly detected ("+(detected*100/text.length())+"%)");
         shell.layout();
 
         ImageLoader saver = new ImageLoader();
