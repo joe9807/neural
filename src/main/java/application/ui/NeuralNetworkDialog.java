@@ -100,7 +100,6 @@ public class NeuralNetworkDialog extends Dialog {
         ImageData imageData = new ImageData(490, 150, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
 
         List<Double> errors = new ArrayList<>(neuralNetwork.getErrors());
-        if (errors.size() != 0) errors.remove(0);
 
         double xScale = imageData.width/ (double) errors.size();
         double min = errors.stream().min(Double::compareTo).orElse(0.0);
