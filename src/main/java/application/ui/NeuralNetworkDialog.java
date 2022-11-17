@@ -28,7 +28,7 @@ public class NeuralNetworkDialog extends Dialog {
     private static final int WEIGHT = 520;
     private static final int HEIGHT = 350;
     private final NeuralNetwork neuralNetwork;
-    private List<List<Double>> inputs;
+    private final List<List<Double>> inputs;
     private Label labelError;
 
     protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, List<List<Double>> inputs) {
@@ -107,12 +107,17 @@ public class NeuralNetworkDialog extends Dialog {
         double yScale = (imageData.height-1)/(max-min);
 
         int index = 0;
+        double prevError = 0;
+        double diff = 0;
         for (Double error:errors) {
+            System.out.printf("%,.15f (%,.15f) %s%n", error, prevError-error, prevError-error<diff?"-":"+");
             int x = (int)(index++*xScale);
             int y = imageData.height-1-(int)((error-min)*yScale);
             if (x>=0 && x<imageData.width && y>=0 && y<imageData.height) {
                 imageData.setPixel(x, y, 1);
             }
+            diff = prevError-error;
+            prevError = error;
         }
         labelError.setImage(new Image(labelError.getDisplay(), imageData));
     }
