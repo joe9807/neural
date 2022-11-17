@@ -17,13 +17,23 @@ public class NeuronWorker implements Runnable {
         }
     }
 
-    public void calculate(){
-        int index = 0;
+    public void calculate() throws Exception{
+        int index = neuron.getWeights().size();
         double v = 0;
-        while (index != neuron.getWeights().size() || index != neuron.getInput().size()) {
-            v+=neuron.getWeights().get(index)*neuron.getInput().get(index);
-            index++;
+
+        while (index-- != 0){
+            NeuralSignal signal = neuron.getQueue().take();
+            v+=signal.getValue()*neuron.getWeights().get(signal.getIndex());
         }
+
         neuron.setOutput(1/(1+Math.exp(-B*v)));
+        send();
+    }
+
+    public void send(){
+        int index = 0;
+        for (Neuron neuron : neuron.getNeurons()) {
+            neuron.getQueue().offer(new NeuralSignal(index++, neuron.getOutput()));
+        }
     }
 }
