@@ -14,9 +14,10 @@ public class NeuralController {
 
     @Operation(summary = "Запустить Тестовый Neural UI")
     @Parameter(name = "noise", example = "0.01")
+    @Parameter(name = "fontSize", example = "15")
     @GetMapping("ui")
-    public String showUI(double noise){
-        new Thread(() -> neuralDialog.init(noise)).start();
+    public String showUI(double noise, int fontSize){
+        new Thread(() -> neuralDialog.init(noise, fontSize)).start();
         return "Neural UI has started in separated window.";
     }
 }

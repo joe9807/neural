@@ -36,11 +36,8 @@ import java.util.stream.IntStream;
 
 @Service
 public class NeuralDialog {
-    private static final int FONT_SIZE = 15;
     private static final int ROWS = 20;
     private static final int COLUMNS = 26;
-    private static int WIDTH;
-    private static int HEIGHT;
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
@@ -54,26 +51,28 @@ public class NeuralDialog {
     private Text textImage;
     private String text;
     private double noise;
+    private int width;
+    private int height;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
 
-    public void init(double noise){
+    public void init(double noise, int fontSize){
         this.noise = noise;
 
         shell = new Shell(new Display(), SWT.CLOSE);
         gc = new GC(shell.getDisplay());
-        gc.setFont(new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL));
-        WIDTH = COLUMNS*gc.getFontMetrics().getAverageCharWidth();
-        HEIGHT = ROWS*gc.getFontMetrics().getHeight()+10;
+        gc.setFont(new Font(shell.getDisplay(), "Courier", fontSize, SWT.NORMAL));
+        width = COLUMNS*gc.getFontMetrics().getAverageCharWidth();
+        height = ROWS*gc.getFontMetrics().getHeight()+10;
         shell.setLayout(new RowLayout());
         shell.setText("Neural Network");
-        shell.setSize(new Point(WIDTH*3+50, HEIGHT+50));
+        shell.setSize(new Point(width *3+50, height +50));
 
         Label leftLabel = new Label(shell, SWT.BORDER);
         middleLabel = new Label(shell, SWT.BORDER);
         textImage = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
-        textImage.setLayoutData(new RowData(WIDTH, HEIGHT));
+        textImage.setLayoutData(new RowData(width, height));
         text = drawImage(leftLabel);
         neuralNetwork.setLearnText(ALPHABET);
         neuralNetwork.initParameters(gc.getFontMetrics().getAverageCharWidth()*gc.getFontMetrics().getHeight(), ALPHABET.length());
@@ -130,7 +129,7 @@ public class NeuralDialog {
     public void run(String text){
         Date startDate = new Date();
 
-        ImageData imageData = new ImageData(WIDTH, HEIGHT, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
+        ImageData imageData = new ImageData(width, height, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
                 new RGB(0, 150, 0), new RGB(255, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
@@ -201,7 +200,7 @@ public class NeuralDialog {
     }
 
     private String drawImage(Label label){
-        ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
+        ImageData imageData = new ImageData(width, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         image = new Image(shell.getDisplay(), imageData);
         GC gcImage = new GC(image);
         gcImage.setFont(gc.getFont());
