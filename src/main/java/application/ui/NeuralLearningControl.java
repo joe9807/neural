@@ -3,8 +3,13 @@ package application.ui;
 import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -25,6 +30,7 @@ public class NeuralLearningControl {
     private Button learnButton;
     private final List<List<Double>> inputs;
     private final Runnable updateLabel;
+    private String elapsedString;
 
     protected NeuralLearningControl(NeuralNetwork neuralNetwork, List<List<Double>> inputs, Runnable updateLabel) {
         this.neuralNetwork = neuralNetwork;
@@ -36,6 +42,21 @@ public class NeuralLearningControl {
         progressBarEpoch = new ProgressBar(parent, SWT.SMOOTH);
         progressBarEpoch.setSelection(0);
         progressBarEpoch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        progressBarEpoch.addPaintListener(e -> {
+            if (elapsedString == null) return;
+
+            Point point = progressBarEpoch.getSize();
+            Font font = new Font(progressBarEpoch.getDisplay(),"Courier",10,SWT.NORMAL);
+            e.gc.setFont(font);
+            e.gc.setForeground(progressBarEpoch.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+
+            FontMetrics fontMetrics = e.gc.getFontMetrics();
+            int stringWidth = fontMetrics.getAverageCharWidth() * elapsedString.length();
+            int stringHeight = fontMetrics.getHeight();
+
+            e.gc.drawString(elapsedString, (point.x-stringWidth)/2 , (point.y-stringHeight)/2, true);
+            font.dispose();
+        });
 
         learnButton = new Button(parent, SWT.PUSH);
         learnButton.setText("Learn");
@@ -43,10 +64,6 @@ public class NeuralLearningControl {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (learnButton.getText().equalsIgnoreCase("Learn")) {
-                    startDate = new Date();
-                    learnButton.setText("Stop");
-                    progressSamples = 0;
-                    progressEpoches = 0;
                     learn();
                 } else {
                     stop();
@@ -59,6 +76,11 @@ public class NeuralLearningControl {
     }
 
     public void learn(){
+        startDate = new Date();
+        elapsedString = null;
+        learnButton.setText("Stop");
+        progressSamples = 0;
+        progressEpoches = 0;
         neuralNetwork.resetErrors();
         progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
         List<List<Double>> deltas = getDeltas(neuralNetwork.getLearnText());
@@ -100,9 +122,9 @@ public class NeuralLearningControl {
     public void stop(){
         learnButton.setText("Learn");
         neuralNetwork.saveWeights();
-        String elapsed = Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
-        String string = "Network has learned. Time elapsed: "+elapsed;
-        System.out.println(string);
+        elapsedString = "Network has learned. Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
+        System.out.println(elapsedString);
         updateLabel.run();
+        progressBarEpoch.redraw();
     }
 }
