@@ -73,7 +73,7 @@ public class NeuralDialog {
         middleLabel = new Label(shell, SWT.BORDER);
         textImage = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
         textImage.setLayoutData(new RowData(width, height));
-        text = drawImage(leftLabel);
+        text = drawLeftImage(leftLabel);
         neuralNetwork.setLearnText(ALPHABET);
         neuralNetwork.initParameters(gc.getFontMetrics().getAverageCharWidth()*gc.getFontMetrics().getHeight(), ALPHABET.length());
 
@@ -96,7 +96,7 @@ public class NeuralDialog {
             public void widgetSelected(SelectionEvent e) {
                 NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork, getInputs());
                 switch (neuralNetworkDialog.open()){
-                     case 1: return;
+                    case 1: return;
                     case 2: {
                         neuralNetwork.saveWithName();
                         return;
@@ -134,32 +134,38 @@ public class NeuralDialog {
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         final AtomicInteger count = new AtomicInteger(text.length());
-        IntStream.range(0, COLUMNS*ROWS).forEach(index-> {
-            List<Double> result = neuralNetwork.calculate(getInput(null, index, index, -1), null).stream().findFirst().orElse(null);
+        int number = COLUMNS*ROWS;
+        IntStream.range(0, number).forEach(index-> {
+            Display.getCurrent().asyncExec(() -> {
+                List<Double> result = neuralNetwork.calculate(getInput(null, index, index, -1), null).stream().findFirst().orElse(null);
 
-            int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
-            String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
-            String shouldLetter = String.valueOf(text.charAt(index));
-            boolean correct = gotLetter.equals(shouldLetter);
-            if (correct) count.getAndDecrement();
+                int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
+                String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
+                String shouldLetter = String.valueOf(text.charAt(index));
+                boolean correct = gotLetter.equals(shouldLetter);
+                if (correct) count.getAndDecrement();
 
-            getInput(imageData, gotIndex, index, correct?2:3);
-            scan.set(scan.get()+gotLetter);
-            if (scan.get().replaceAll("\n", "").length()%COLUMNS == 0) {
-                scan.set(scan.get()+"\n");
-            }
+                getInput(imageData, gotIndex, index, correct?2:3);
+                scan.set(scan.get()+gotLetter);
+                if (scan.get().replaceAll("\n", "").length()%COLUMNS == 0) {
+                    scan.set(scan.get()+"\n");
+                }
+
+                middleLabel.setImage(new Image(shell.getDisplay(), imageData));
+                shell.layout();
+
+                if (index == number -1) {
+                    int detected = (text.length()-count.get());
+                    textImage.setText(scan.get()+"\n"+detected+" of "+text.length()+" characters were properly detected ("+(detected*100/text.length())+"%)");
+
+                    ImageLoader saver = new ImageLoader();
+                    saver.data = new ImageData[] { imageData };
+                    saver.save(FILE_NAME_OUTPUT, SWT.IMAGE_PNG);
+
+                    System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
+                }
+            });
         });
-
-        middleLabel.setImage(new Image(shell.getDisplay(), imageData));
-        int detected = (text.length()-count.get());
-        textImage.setText(scan.get()+"\n"+detected+" of "+text.length()+" characters were properly detected ("+(detected*100/text.length())+"%)");
-        shell.layout();
-
-        ImageLoader saver = new ImageLoader();
-        saver.data = new ImageData[] { imageData };
-        saver.save(FILE_NAME_OUTPUT, SWT.IMAGE_PNG);
-
-        System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
     }
 
     private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){
@@ -184,8 +190,8 @@ public class NeuralDialog {
 
                 int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
-                    if (indexRead == indexWrite || readValue != 0) {
-                        imageData.setPixel(writeX, writeY, pixelToSet < 0 ? readValue : (readValue == 1 ? pixelToSet : 0));
+                    if (readValue == 1) {
+                        imageData.setPixel(writeX, writeY, indexRead == indexWrite?2:3);
                     }
 
                     if (x == 0 || y == 0) {
@@ -199,7 +205,7 @@ public class NeuralDialog {
         return input;
     }
 
-    private String drawImage(Label label){
+    private String drawLeftImage(Label label){
         ImageData imageData = new ImageData(width, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         image = new Image(shell.getDisplay(), imageData);
         GC gcImage = new GC(image);
@@ -219,7 +225,7 @@ public class NeuralDialog {
             gcImage.drawString(result, 0, gc.getFontMetrics().getHeight()*row);
 
             if (row>1) {
-                randomDots(gcImage, imageData.width, row);
+                randomDots(gcImage, row);
             }
         });
         label.setImage(image);
@@ -231,11 +237,11 @@ public class NeuralDialog {
         return builder.toString();
     }
 
-    private void randomDots(GC gc, int width, int row){
+    private void randomDots(GC gc, int row){
         IntStream.range(0, width).forEach(x->{
             IntStream.range(this.gc.getFontMetrics().getHeight()*row, this.gc.getFontMetrics().getHeight()*(row+1)).forEach(y->{
                 if (Math.random()<noise) {
-                    gc.drawRectangle(x, y, 1, 1);
+                    gc.drawPoint(x, y);
                 }
             });
         });
