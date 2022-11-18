@@ -191,7 +191,7 @@ public class NeuralDialog {
                 int readValue = image.getImageData().getPixel(readX, readY);
                 if (imageData != null) {
                     if (readValue == 1) {
-                        imageData.setPixel(writeX, writeY, indexRead == indexWrite?2:3);
+                        imageData.setPixel(writeX, writeY, pixelToSet);
                     }
 
                     if (x == 0 || y == 0) {
