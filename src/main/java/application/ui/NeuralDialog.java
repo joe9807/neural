@@ -39,16 +39,16 @@ public class NeuralDialog {
     private static final int FONT_SIZE = 15;
     private static final int ROWS = 20;
     private static final int COLUMNS = 26;
-    private static final int WIDTH = COLUMNS*(FONT_SIZE-3);
-    private static final int HEIGHT = ROWS*(FONT_SIZE+5)+10;
+    private static int WIDTH;
+    private static int HEIGHT;
     private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
     private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
     private static final String FILE_NAME_INPUT = "input.png";
     private static final String FILE_NAME_OUTPUT = "output.png";
-    public static final int INPUT_SIZE = (FONT_SIZE+5)*(FONT_SIZE-3);
 
     private Shell shell;
+    private GC gc;
     private Image image;
     private Label middleLabel;
     private Text textImage;
@@ -62,6 +62,10 @@ public class NeuralDialog {
         this.noise = noise;
 
         shell = new Shell(new Display(), SWT.CLOSE);
+        gc = new GC(shell.getDisplay());
+        gc.setFont(new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL));
+        WIDTH = COLUMNS*gc.getFontMetrics().getAverageCharWidth();
+        HEIGHT = ROWS*gc.getFontMetrics().getHeight()+10;
         shell.setLayout(new RowLayout());
         shell.setText("Neural Network");
         shell.setSize(new Point(WIDTH*3+50, HEIGHT+50));
@@ -72,6 +76,7 @@ public class NeuralDialog {
         textImage.setLayoutData(new RowData(WIDTH, HEIGHT));
         text = drawImage(leftLabel);
         neuralNetwork.setLearnText(ALPHABET);
+        neuralNetwork.initParameters(gc.getFontMetrics().getAverageCharWidth()*gc.getFontMetrics().getHeight(), ALPHABET.length());
 
         setMenu(leftLabel);
         shell.open();
@@ -159,8 +164,8 @@ public class NeuralDialog {
     }
 
     private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){
-        int frameX = FONT_SIZE - 3;
-        int frameY = FONT_SIZE + 5;
+        int frameX = gc.getFontMetrics().getAverageCharWidth();
+        int frameY = gc.getFontMetrics().getHeight();
         int shiftFrameX = image.getImageData().width/frameX;
 
         int shiftReadY = frameY*(indexRead / shiftFrameX);
@@ -199,7 +204,7 @@ public class NeuralDialog {
         ImageData imageData = new ImageData(WIDTH, HEIGHT, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         image = new Image(shell.getDisplay(), imageData);
         GC gcImage = new GC(image);
-        gcImage.setFont(new Font(shell.getDisplay(), "Courier", FONT_SIZE, SWT.NORMAL));
+        gcImage.setFont(gc.getFont());
 
         final StringBuilder builder = new StringBuilder();
         IntStream.range(0, ROWS).forEach(row->{
@@ -212,7 +217,7 @@ public class NeuralDialog {
                 result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52)) + "").collect(Collectors.joining());
             }
             builder.append(result);
-            gcImage.drawString(result, 0, (FONT_SIZE + 5)*row);
+            gcImage.drawString(result, 0, gc.getFontMetrics().getHeight()*row);
 
             if (row>1) {
                 randomDots(gcImage, imageData.width, row);
@@ -229,7 +234,7 @@ public class NeuralDialog {
 
     private void randomDots(GC gc, int width, int row){
         IntStream.range(0, width).forEach(x->{
-            IntStream.range((FONT_SIZE + 5)*row, (FONT_SIZE + 5)*(row+1)).forEach(y->{
+            IntStream.range(this.gc.getFontMetrics().getHeight()*row, this.gc.getFontMetrics().getHeight()*(row+1)).forEach(y->{
                 if (Math.random()<noise) {
                     gc.drawRectangle(x, y, 1, 1);
                 }

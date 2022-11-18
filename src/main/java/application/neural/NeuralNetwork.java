@@ -161,4 +161,8 @@ public class NeuralNetwork {
     public void setLearnText(String learnText) {
         this.learnText = learnText;
     }
+
+    public void initParameters(int inputSize, int outputSize) {
+        parameters.setLevels(inputSize+";20;"+outputSize);
+    }
 }
