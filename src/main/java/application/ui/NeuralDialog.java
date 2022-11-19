@@ -34,16 +34,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static application.neural.NeuralConstants.ALPHABET;
+import static application.neural.NeuralConstants.ALPHABET_LOWER_CASE;
+import static application.neural.NeuralConstants.ALPHABET_UPPER_CASE;
+import static application.neural.NeuralConstants.COLUMNS;
+import static application.neural.NeuralConstants.FILE_NAME_INPUT;
+import static application.neural.NeuralConstants.FILE_NAME_OUTPUT;
+import static application.neural.NeuralConstants.ROWS;
+
 @Service
 public class NeuralDialog {
-    private static final int ROWS = 20;
-    private static final int COLUMNS = 26;
-    private static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String ALPHABET_LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
-    private static final String ALPHABET = ALPHABET_UPPER_CASE+ALPHABET_LOWER_CASE;
-    private static final String FILE_NAME_INPUT = "input.png";
-    private static final String FILE_NAME_OUTPUT = "output.png";
-
     private Shell shell;
     private GC gc;
     private Image image;
