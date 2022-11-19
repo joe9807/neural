@@ -2,6 +2,7 @@ package application.neural;
 
 import application.repository.entity.Weight;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,7 +14,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class NeuronExecutor {
-    private ForkJoinPool executor = new ForkJoinPool(200);
+    private final ForkJoinPool executor = new ForkJoinPool(200);
+
+    @Value("${neural.executor.single:false}")
+    private boolean single;
+
     @Autowired
     private NeuralRepository neuralRepository;
 
@@ -45,20 +50,35 @@ public class NeuronExecutor {
 
         final List<Neuron> neurons = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
+        final List<Double> singleResult = new ArrayList<>();
 
         List<List<Double>> matrix = getMatrix(level, delta != null);
         if (delta == null){
             for (int i=0;i<matrix.size();i++) {
                 Neuron neuron = new Neuron(i, matrix.get(i), input);
-                neurons.add(neuron);
-                futures.add(executor.submit(neuron.getWorker()));
+                if (single){
+                    neuron.getWorker().run();
+                    singleResult.add(neuron.getOutput());
+                } else {
+                    neurons.add(neuron);
+                    futures.add(executor.submit(neuron.getWorker()));
+                }
             }
         } else {
             for (int j=0;j<input.size();j++){
                 Neuron neuron = new NeuronBack(j, matrix.size() == 0?null:matrix.get(j), input, delta);
-                neurons.add(neuron);
-                futures.add(executor.submit(neuron.getWorker()));
+                if (single) {
+                    neuron.getWorker().run();
+                    singleResult.add(neuron.getOutput());
+                } else {
+                    neurons.add(neuron);
+                    futures.add(executor.submit(neuron.getWorker()));
+                }
             }
+        }
+
+        if (single) {
+            return singleResult;
         }
 
         while (futures.size() != 0) futures.removeIf(Future::isDone);
