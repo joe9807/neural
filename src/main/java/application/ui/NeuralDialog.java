@@ -239,7 +239,7 @@ public class NeuralDialog {
 
     private void randomDots(GC gc, int row){
         IntStream.range(0, width).forEach(x->{
-            IntStream.range(this.gc.getFontMetrics().getHeight()*row, this.gc.getFontMetrics().getHeight()*(row+1)).forEach(y->{
+            IntStream.range(gc.getFontMetrics().getHeight()*row, gc.getFontMetrics().getHeight()*(row+1)).forEach(y->{
                 if (Math.random()<noise) {
                     gc.drawPoint(x, y);
                 }
