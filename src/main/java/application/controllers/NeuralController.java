@@ -13,7 +13,7 @@ public class NeuralController {
     private NeuralDialog neuralDialog;
 
     @Operation(summary = "Запустить Тестовый Neural UI")
-    @Parameter(name = "noise", example = "0.01")
+    @Parameter(name = "noise", example = "0.1")
     @Parameter(name = "fontSize", example = "15")
     @GetMapping("ui")
     public String showUI(double noise, int fontSize){
