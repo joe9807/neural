@@ -222,10 +222,11 @@ public class NeuralDialog {
                 result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52)) + "").collect(Collectors.joining());
             }
             builder.append(result);
-            gcImage.drawString(result, 0, gc.getFontMetrics().getHeight()*row);
+            gcImage.setForeground(gcImage.getDevice().getSystemColor(SWT.COLOR_BLACK));
+            gcImage.drawString(result, 0, gcImage.getFontMetrics().getHeight()*row);
 
             if (row>1) {
-                randomDots(gcImage, row);
+                randomDots(gcImage, image.getImageData(), row);
             }
         });
         label.setImage(image);
@@ -237,10 +238,15 @@ public class NeuralDialog {
         return builder.toString();
     }
 
-    private void randomDots(GC gc, int row){
+    private void randomDots(GC gc, ImageData imageData, int row){
         IntStream.range(0, width).forEach(x->{
             IntStream.range(gc.getFontMetrics().getHeight()*row, gc.getFontMetrics().getHeight()*(row+1)).forEach(y->{
                 if (Math.random()<noise) {
+                    if (imageData.getPixel(x, y) == 1) {
+                        gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
+                    } else {
+                        gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_BLACK));
+                    }
                     gc.drawPoint(x, y);
                 }
             });
