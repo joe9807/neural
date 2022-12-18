@@ -52,28 +52,16 @@ public class NeuronExecutor {
         final List<Future<?>> futures = new ArrayList<>();
         final List<Double> singleResult = new ArrayList<>();
 
-        List<List<Double>> matrix = getMatrix(level, delta != null);
-        if (delta == null){
-            for (int i=0;i<matrix.size();i++) {
-                Neuron neuron = new Neuron(i, matrix.get(i), input);
-                if (single){
-                    neuron.getWorker().run();
-                    singleResult.add(neuron.getOutput());
-                } else {
-                    neurons.add(neuron);
-                    futures.add(executor.submit(neuron.getWorker()));
-                }
-            }
-        } else {
-            for (int j=0;j<input.size();j++){
-                Neuron neuron = new NeuronBack(j, matrix.size() == 0?null:matrix.get(j), input, delta);
-                if (single) {
-                    neuron.getWorker().run();
-                    singleResult.add(neuron.getOutput());
-                } else {
-                    neurons.add(neuron);
-                    futures.add(executor.submit(neuron.getWorker()));
-                }
+        boolean back = delta != null;
+        List<List<Double>> matrix = getMatrix(level, back);
+        for (int i=0;i<(back?input.size():matrix.size());i++) {
+            Neuron neuron = NeuronFactory.getNeuron(i, matrix, input, delta);
+            if (single){
+                neuron.getWorker().run();
+                singleResult.add(neuron.getOutput());
+            } else {
+                neurons.add(neuron);
+                futures.add(executor.submit(neuron.getWorker()));
             }
         }
 
