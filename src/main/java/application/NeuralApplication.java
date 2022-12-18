@@ -8,5 +8,6 @@ public class NeuralApplication {
     public static void main(String args[]){
         SpringApplication.run(NeuralApplication.class, args);
         //test comment
+        //another test comment
     }
 }
