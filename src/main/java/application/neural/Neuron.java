@@ -13,11 +13,13 @@ public class Neuron implements Comparable<Neuron>{
     private List<Double> input;
     private int number;
     private double output;
+    private Double value;
 
-    public Neuron(int number, List<Double> weights, List<Double> input){
+    public Neuron(int number, List<Double> weights, List<Double> input, Double value){
         this.number = number;
         this.weights = weights;
         this.input = input;
+        this.value = value;
     }
 
     @Override

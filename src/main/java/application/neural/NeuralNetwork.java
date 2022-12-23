@@ -96,7 +96,7 @@ public class NeuralNetwork {
 
         List<List<Double>> deltas = new ArrayList<>();
         while (outputs.size()-deltas.size()>1) {
-            deltas.add(0, neuronExecutor.calculate(outputs.size()-deltas.size(), outputs.get(deltas.size()), deltas.stream().findFirst().orElse(delta)));
+            deltas.add(0, neuronExecutor.calculate(outputs.size()-deltas.size(), deltas.stream().findFirst().orElse(delta), outputs.get(deltas.size())));
         }
 
         int level = outputs.size();

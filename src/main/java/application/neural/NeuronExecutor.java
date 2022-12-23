@@ -45,17 +45,17 @@ public class NeuronExecutor {
         while (futures.size() != 0) futures.removeIf(Future::isDone);
     }
 
-    public List<Double> calculate(int level, List<Double> input, List<Double> delta){
+    public List<Double> calculate(int level, List<Double> input, List<Double> values){
         if (level == 0) return input;
 
         final List<Neuron> neurons = new ArrayList<>();
         final List<Future<?>> futures = new ArrayList<>();
         final List<Double> singleResult = new ArrayList<>();
 
-        boolean back = delta != null;
+        boolean back = values != null;
         List<List<Double>> matrix = getMatrix(level, back);
-        for (int i=0;i<(back?input.size():matrix.size());i++) {
-            Neuron neuron = NeuronFactory.getNeuron(i, matrix, input, delta);
+        for (int i=0;i<(back?values.size():matrix.size());i++) {
+            Neuron neuron = NeuronFactory.getNeuron(i, matrix, input, values);
             if (single){
                 neuron.getWorker().run();
                 singleResult.add(neuron.getOutput());
