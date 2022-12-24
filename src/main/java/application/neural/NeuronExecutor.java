@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NeuronExecutor {
-    private final ForkJoinPool executor = new ForkJoinPool(200);
+    private final ForkJoinPool executor = new ForkJoinPool(200, ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e) -> e.printStackTrace(System.out), false);
 
     @Value("${neural.executor.single:false}")
     private boolean single;
@@ -49,7 +49,7 @@ public class NeuronExecutor {
         if (level == 0) return input;
 
         final List<Neuron> neurons = new ArrayList<>();
-        final List<Future<?>> futures = new ArrayList<>();
+        final List<Neuron> result = new ArrayList<>();
         final List<Double> singleResult = new ArrayList<>();
 
         boolean back = values != null;
@@ -61,7 +61,7 @@ public class NeuronExecutor {
                 singleResult.add(neuron.getOutput());
             } else {
                 neurons.add(neuron);
-                futures.add(executor.submit(neuron.getWorker()));
+                executor.execute(neuron.getWorker());
             }
         }
 
@@ -69,7 +69,15 @@ public class NeuronExecutor {
             return singleResult;
         }
 
-        while (futures.size() != 0) futures.removeIf(Future::isDone);
-        return neurons.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
+        while (neurons.size() != 0) {
+            for (Neuron neuron:neurons) {
+                if (neuron.getOutput() != null) {
+                    result.add(neuron);
+                }
+            }
+
+            neurons.removeAll(result);
+        }
+        return result.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
     }
 }

@@ -12,8 +12,8 @@ public class Neuron implements Comparable<Neuron>{
     private List<Double> weights;
     private List<Double> input;
     private int number;
-    private double output;
-    private Double value;
+    private Double output = null;
+    private Double value = null;
 
     public Neuron(int number, List<Double> weights, List<Double> input, Double value){
         this.number = number;

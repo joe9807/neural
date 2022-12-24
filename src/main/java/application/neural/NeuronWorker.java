@@ -10,11 +10,7 @@ public class NeuronWorker implements Runnable {
 
     @Override
     public void run() {
-        try{
-            calculate();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        calculate();
     }
 
     public void calculate(){
