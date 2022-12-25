@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
@@ -49,14 +50,15 @@ public class NeuronExecutor {
         if (level == 0) return input;
 
         final List<Neuron> neurons = new ArrayList<>();
-        final List<Neuron> result = new ArrayList<>();
         final List<Double> singleResult = new ArrayList<>();
 
-        boolean back = values != null;
-        List<List<Double>> matrix = getMatrix(level, back);
-        for (int i=0;i<(back?values.size():matrix.size());i++) {
-            Neuron neuron = NeuronFactory.getNeuron(i, matrix, input, values);
-            if (single){
+        List<List<Double>> matrix = getMatrix(level, values != null);
+        int count = values != null?values.size():matrix.size();
+        final Double[] result = new Double[count];
+
+        for (int number=0;number<count;number++) {
+            Neuron neuron = NeuronFactory.getNeuron(number, matrix, input, values);
+            if (single) {
                 neuron.getWorker().run();
                 singleResult.add(neuron.getOutput());
             } else {
@@ -70,14 +72,17 @@ public class NeuronExecutor {
         }
 
         while (neurons.size() != 0) {
+            final List<Neuron> temp = new ArrayList<>();
+
             for (Neuron neuron:neurons) {
                 if (neuron.getOutput() != null) {
-                    result.add(neuron);
+                    result[neuron.getNumber()] = neuron.getOutput();
+                    temp.add(neuron);
                 }
             }
 
-            neurons.removeAll(result);
+            neurons.removeAll(temp);
         }
-        return result.stream().sorted().map(Neuron::getOutput).collect(Collectors.toList());
+        return Arrays.asList(result);
     }
 }
