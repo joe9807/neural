@@ -88,7 +88,7 @@ public class NeuralNetwork {
     public List<List<Double>> calculate(List<Double> input, List<Double> delta){
         List<List<Double>> outputs = new ArrayList<>();
         List<Double> output;
-        while ((output = neuronExecutor.calculate(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)).size() != 0) {
+        while ((output = neuronExecutor.calculateLevel(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)).size() != 0) {
             outputs.add(0, output);
         }
 
@@ -96,7 +96,7 @@ public class NeuralNetwork {
 
         List<List<Double>> deltas = new ArrayList<>();
         while (outputs.size()-deltas.size()>1) {
-            deltas.add(0, neuronExecutor.calculate(outputs.size()-deltas.size(), deltas.stream().findFirst().orElse(delta), outputs.get(deltas.size())));
+            deltas.add(0, neuronExecutor.calculateLevel(outputs.size()-deltas.size(), deltas.stream().findFirst().orElse(delta), outputs.get(deltas.size())));
         }
 
         int level = outputs.size();

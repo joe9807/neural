@@ -46,7 +46,7 @@ public class NeuronExecutor {
         while (futures.size() != 0) futures.removeIf(Future::isDone);
     }
 
-    public List<Double> calculate(int level, List<Double> input, List<Double> values){
+    public List<Double> calculateLevel(int level, List<Double> input, List<Double> values){
         if (level == 0) return input;
 
         final List<Neuron> neurons = new ArrayList<>();
