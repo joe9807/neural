@@ -18,6 +18,6 @@ public class NeuralController {
     @GetMapping("ui")
     public String showUI(double noise, int fontSize){
         new Thread(() -> neuralDialog.init(noise, fontSize)).start();
-        return "Neural UI has started in separated window.";
+        return String.format("Neural UI has started in separated window. noise: %s, size: %s", noise, fontSize);
     }
 }
