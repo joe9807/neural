@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Text;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class NeuralNetworkDialog extends Dialog {
     private static final int WEIGHT = 520;
@@ -97,7 +98,9 @@ public class NeuralNetworkDialog extends Dialog {
     public void drawErrors(){
         if (neuralNetwork.getErrors() == null) return;
 
-        ImageData imageData = new ImageData(490, 150, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 200, 0)}));
+        ImageData imageData = new ImageData(490, 150, 2, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(200, 0, 0), new RGB(0, 200, 0)}));
+
+        IntStream.range(0, imageData.width).forEach(x-> imageData.setPixel(x, x *imageData.height/imageData.width, 2));
 
         List<Double> errors = new ArrayList<>(neuralNetwork.getErrors());
 
