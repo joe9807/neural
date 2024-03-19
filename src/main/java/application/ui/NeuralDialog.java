@@ -51,6 +51,7 @@ public class NeuralDialog {
     private GC gc;
     private Image image;
     private Label middleLabel;
+    private MouseListener mouseListener;
     private Text textImage;
     private String text;
     private double noise;
@@ -174,7 +175,11 @@ public class NeuralDialog {
             });
         });
 
-        middleLabel.addMouseListener(new MouseListener() {
+        if (mouseListener != null) {
+            middleLabel.removeMouseListener(mouseListener);
+        }
+
+        mouseListener = new MouseListener() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
             }
@@ -186,13 +191,14 @@ public class NeuralDialog {
             @Override
             public void mouseUp(MouseEvent e) {
                 if (e.button == 1) {
-                    int x = e.x/gc.getFontMetrics().getAverageCharWidth();
                     int index = (COLUMNS*(e.y/gc.getFontMetrics().getHeight()))+e.x/gc.getFontMetrics().getAverageCharWidth();
                     NeuralCorrectionDialog neuralCorrectionDialog = new NeuralCorrectionDialog(shell, fontSize, results.get(index), index);
                     neuralCorrectionDialog.open();
                 }
             }
-        });
+        };
+
+        middleLabel.addMouseListener(mouseListener);
     }
 
     private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){

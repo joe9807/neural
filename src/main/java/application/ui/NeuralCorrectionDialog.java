@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -49,8 +50,8 @@ public class NeuralCorrectionDialog extends Dialog {
     private void drawLeftImage(Composite composite, Label label){
         GC gc = new GC(composite.getDisplay());
         gc.setFont(Utils.getFont(composite.getDisplay(), fontSize));
-        int width = gc.getFontMetrics().getAverageCharWidth()+220;
-        int height = COLUMNS*gc.getFontMetrics().getHeight()+10;
+        int width = gc.getFontMetrics().getAverageCharWidth()*2+800;
+        int height = COLUMNS*gc.getFontMetrics().getHeight();
 
         ImageData imageData = new ImageData(width-50, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
         Image image = new Image(composite.getDisplay(), imageData);
@@ -65,7 +66,7 @@ public class NeuralCorrectionDialog extends Dialog {
             String result = String.valueOf(ALPHABET.charAt(index));
             int x = pos/COLUMNS;
             int y = pos%COLUMNS;
-            gcImage.drawString(result, x*gcImage.getFontMetrics().getAverageCharWidth(), gcImage.getFontMetrics().getHeight()*y);
+            gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).toPlainString()), x*350, gcImage.getFontMetrics().getHeight()*y);
             cloneResult.set(index, -1d);
         });
         label.setImage(image);
