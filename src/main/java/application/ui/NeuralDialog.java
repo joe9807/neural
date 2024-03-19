@@ -4,9 +4,10 @@ import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -27,7 +28,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,16 +56,18 @@ public class NeuralDialog {
     private double noise;
     private int width;
     private int height;
+    private int fontSize;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
 
     public void init(double noise, int fontSize){
         this.noise = noise;
+        this.fontSize = fontSize;
 
         shell = new Shell(new Display(), SWT.CLOSE);
         gc = new GC(shell.getDisplay());
-        gc.setFont(new Font(shell.getDisplay(), "Courier", fontSize, SWT.NORMAL));
+        gc.setFont(Utils.getFont(shell.getDisplay(), fontSize));
         width = COLUMNS*gc.getFontMetrics().getAverageCharWidth();
         height = ROWS*gc.getFontMetrics().getHeight()+10;
         shell.setLayout(new RowLayout());
@@ -135,11 +140,13 @@ public class NeuralDialog {
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         final AtomicInteger count = new AtomicInteger(text.length());
         int number = COLUMNS*ROWS;
+        Map<Integer, List<Double>> results = new HashMap<>();
         IntStream.range(0, number).forEach(index-> {
             Display.getCurrent().asyncExec(() -> {
                 List<Double> result = neuralNetwork.calculate(getInput(null, index, index, -1), null).stream().findFirst().orElse(null);
+                results.put(index, result);
 
-                int gotIndex = IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
+                int gotIndex = Utils.getBestIndex(result);
                 String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
                 String shouldLetter = String.valueOf(text.charAt(index));
                 boolean correct = gotLetter.equals(shouldLetter);
@@ -165,6 +172,26 @@ public class NeuralDialog {
                     System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
                 }
             });
+        });
+
+        middleLabel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseDoubleClick(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseDown(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseUp(MouseEvent e) {
+                if (e.button == 1) {
+                    int x = e.x/gc.getFontMetrics().getAverageCharWidth();
+                    int index = (COLUMNS*(e.y/gc.getFontMetrics().getHeight()))+e.x/gc.getFontMetrics().getAverageCharWidth();
+                    NeuralCorrectionDialog neuralCorrectionDialog = new NeuralCorrectionDialog(shell, fontSize, results.get(index), index);
+                    neuralCorrectionDialog.open();
+                }
+            }
         });
     }
 

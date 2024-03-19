@@ -1,6 +1,11 @@
 package application.utils;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
+
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Utils {
     public static String getTimeElapsed(long elapsed) {
@@ -46,5 +51,13 @@ public class Utils {
         for (int i=0;i<level.size();i++){
             System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
         }
+    }
+
+    public static Font getFont(Display display, int fontSize){
+        return new Font(display, "Courier", fontSize, SWT.NORMAL);
+    }
+
+    public static int getBestIndex(List<Double> result){
+        return IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
     }
 }
