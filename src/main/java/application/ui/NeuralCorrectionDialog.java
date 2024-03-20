@@ -50,7 +50,7 @@ public class NeuralCorrectionDialog extends Dialog {
     private void drawLeftImage(Composite composite, Label label){
         GC gc = new GC(composite.getDisplay());
         gc.setFont(Utils.getFont(composite.getDisplay(), fontSize));
-        int width = gc.getFontMetrics().getAverageCharWidth()*2+800;
+        int width = gc.getFontMetrics().getAverageCharWidth()*55;
         int height = COLUMNS*gc.getFontMetrics().getHeight();
 
         ImageData imageData = new ImageData(width-50, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
@@ -66,7 +66,7 @@ public class NeuralCorrectionDialog extends Dialog {
             String result = String.valueOf(ALPHABET.charAt(index));
             int x = pos/COLUMNS;
             int y = pos%COLUMNS;
-            gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).toPlainString()), x*350, gcImage.getFontMetrics().getHeight()*y);
+            gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).toPlainString()), x*width/2, gcImage.getFontMetrics().getHeight()*y);
             cloneResult.set(index, -1d);
         });
         label.setImage(image);
