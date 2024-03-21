@@ -6,8 +6,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -58,8 +56,6 @@ public class NeuralCorrectionDialog extends Dialog {
         int width = gc.getFontMetrics().getAverageCharWidth()*55;
         int height = COLUMNS*gc.getFontMetrics().getHeight();
 
-        //ImageData imageData = new ImageData(width-50, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0), new RGB(255, 0, 0) }));
-
         Image image = new Image(composite.getDisplay(), width-50, height);
         GC gcImage = new GC(image);
         gcImage.setFont(gc.getFont());
@@ -86,7 +82,7 @@ public class NeuralCorrectionDialog extends Dialog {
 
         gcImage.dispose();
         final ImageData id = image.getImageData();
-        Utils.getInput(gc, Objects.requireNonNull(leftImage.getImageData()), id, index, 1, 1);
+        Utils.getInput(gc, Objects.requireNonNull(leftImage.getImageData()), id, index, 1, 1, false);
 
         label.setImage(new Image(composite.getDisplay(), id));
     }

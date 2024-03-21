@@ -64,7 +64,7 @@ public class Utils {
         return IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
     }
 
-    public static List<Double> getInput(GC gc, ImageData imageDataRead, ImageData imageDataWrite, int indexRead, int indexWrite, int pixelToSet){
+    public static List<Double> getInput(GC gc, ImageData imageDataRead, ImageData imageDataWrite, int indexRead, int indexWrite, int pixelToSet, boolean drawBorder){
         int frameX = gc.getFontMetrics().getAverageCharWidth();
         int frameY = gc.getFontMetrics().getHeight();
         int shiftFrameX = imageDataRead.width/frameX;
@@ -90,7 +90,7 @@ public class Utils {
                         imageDataWrite.setPixel(writeX, writeY, pixelToSet);
                     }
 
-                    if (x == 0 || y == 0) {
+                    if (drawBorder && (x == 0 || y == 0)) {
                         imageDataWrite.setPixel(writeX, writeY, 1);
                     }
                 }

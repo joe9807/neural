@@ -129,7 +129,7 @@ public class NeuralDialog {
     }
 
     public List<List<Double>> getInputs(){
-        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1)).collect(Collectors.toList());
+        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).collect(Collectors.toList());
     }
 
     public void run(String text){
@@ -144,7 +144,7 @@ public class NeuralDialog {
         Map<Integer, List<Double>> results = new HashMap<>();
         IntStream.range(0, number).forEach(index-> {
             Display.getCurrent().asyncExec(() -> {
-                List<Double> result = neuralNetwork.calculate(Utils.getInput(gc, image.getImageData(), null, index, index, -1), null).stream().findFirst().orElse(null);
+                List<Double> result = neuralNetwork.calculate(Utils.getInput(gc, image.getImageData(), null, index, index, -1, true), null).stream().findFirst().orElse(null);
                 results.put(index, result);
 
                 int gotIndex = Utils.getBestIndex(result);
@@ -153,7 +153,7 @@ public class NeuralDialog {
                 boolean correct = gotLetter.equals(shouldLetter);
                 if (correct) count.getAndDecrement();
 
-                Utils.getInput(gc, image.getImageData(), imageDataWrite, gotIndex, index, correct?2:3);
+                Utils.getInput(gc, image.getImageData(), imageDataWrite, gotIndex, index, correct?2:3, true);
                 scan.set(scan.get()+gotLetter);
                 if (scan.get().replaceAll("\n", "").length()%COLUMNS == 0) {
                     scan.set(scan.get()+"\n");
