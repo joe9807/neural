@@ -1,5 +1,6 @@
 package application.ui;
 
+import application.neural.NeuralConstants;
 import application.neural.NeuralNetwork;
 import application.utils.Utils;
 import org.eclipse.swt.SWT;
@@ -84,7 +85,7 @@ public class NeuralLearningControl {
         List<List<Double>> deltas = getDeltas(neuralNetwork.getLearnText());
 
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
-            IntStream.range(0, neuralNetwork.getLearnText().length()).forEach(index-> {
+            IntStream.range(0, inputs.size()).forEach(index-> {
                 Display.getCurrent().asyncExec(()->{
                     if (learnButton.getText().equalsIgnoreCase("Stop")) {
                         neuralNetwork.calculate(inputs.get(index), deltas.get(index));
@@ -96,16 +97,17 @@ public class NeuralLearningControl {
     }
 
     private List<List<Double>> getDeltas(String learnText){
-        return IntStream.range(0, learnText.length()).mapToObj(index-> IntStream.range(0, learnText.length()).mapToObj(tempIndex-> tempIndex == index?1.0:0.0)
+        return IntStream.range(0, inputs.size()).mapToObj(learnIndex-> IntStream.range(0, NeuralConstants.ALPHABET.length())
+                .mapToObj(alphabetIndex-> learnText.charAt(learnIndex) == NeuralConstants.ALPHABET.charAt(alphabetIndex)?1.0:0.0)
                 .collect(Collectors.toList())).collect(Collectors.toList());
     }
 
     public void step(NeuralNetwork neuralNetwork){
         progressSamples++;
 
-        if (progressSamples == neuralNetwork.getLearnText().length()) {
+        if (progressSamples == inputs.size()) {
             progressEpoches++;
-            neuralNetwork.calculateErrors(neuralNetwork.getLearnText().length());
+            neuralNetwork.calculateErrors(inputs.size());
 
             if (progressEpoches == Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())) {
                 stop();
