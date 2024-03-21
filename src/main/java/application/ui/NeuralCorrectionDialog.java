@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Shell;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static application.neural.NeuralConstants.ALPHABET;
@@ -25,12 +26,16 @@ public class NeuralCorrectionDialog extends Dialog {
     private final int fontSize;
     private final List<Double> result;
     private final int index;
+    private final Image leftImage;
+    private final String shouldLetter;
 
-    protected NeuralCorrectionDialog(Shell parentShell, int fontSize, List<Double> result, int index) {
+    protected NeuralCorrectionDialog(Shell parentShell, int fontSize, List<Double> result, int index, Image leftImage, String shouldLetter) {
         super(parentShell);
         this.fontSize = fontSize;
         this.result = result;
         this.index = index;
+        this.leftImage = leftImage;
+        this.shouldLetter = shouldLetter;
     }
 
     @Override
@@ -53,23 +58,36 @@ public class NeuralCorrectionDialog extends Dialog {
         int width = gc.getFontMetrics().getAverageCharWidth()*55;
         int height = COLUMNS*gc.getFontMetrics().getHeight();
 
-        ImageData imageData = new ImageData(width-50, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0) }));
-        Image image = new Image(composite.getDisplay(), imageData);
+        //ImageData imageData = new ImageData(width-50, height, 1, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0), new RGB(255, 0, 0) }));
+
+        Image image = new Image(composite.getDisplay(), width-50, height);
         GC gcImage = new GC(image);
         gcImage.setFont(gc.getFont());
-        gcImage.setForeground(gcImage.getDevice().getSystemColor(SWT.COLOR_BLACK));
 
         List<Double> cloneResult = new ArrayList<>(result);
         IntStream.range(0, result.size()).forEach(pos->{
             int index = Utils.getBestIndex(cloneResult);
-
             String result = String.valueOf(ALPHABET.charAt(index));
+
+            gcImage.setForeground(composite.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+
+            if (result.equals(shouldLetter)){
+                gcImage.setForeground(composite.getDisplay().getSystemColor(SWT.COLOR_GREEN));
+            }
+
+            if (pos == 0 && !result.equals(shouldLetter)) {
+                gcImage.setForeground(composite.getDisplay().getSystemColor(SWT.COLOR_RED));
+            }
             int x = pos/COLUMNS;
             int y = pos%COLUMNS;
             gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).toPlainString()), x*width/2, gcImage.getFontMetrics().getHeight()*y);
             cloneResult.set(index, -1d);
         });
-        label.setImage(image);
 
+        gcImage.dispose();
+        final ImageData id = image.getImageData();
+        Utils.getInput(gc, Objects.requireNonNull(leftImage.getImageData()), id, index, 1, 1);
+
+        label.setImage(new Image(composite.getDisplay(), id));
     }
 }

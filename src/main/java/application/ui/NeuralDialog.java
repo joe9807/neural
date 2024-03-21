@@ -129,13 +129,13 @@ public class NeuralDialog {
     }
 
     public List<List<Double>> getInputs(){
-        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> getInput(null, index, index, -1)).collect(Collectors.toList());
+        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1)).collect(Collectors.toList());
     }
 
     public void run(String text){
         Date startDate = new Date();
 
-        ImageData imageData = new ImageData(width, height, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
+        ImageData imageDataWrite = new ImageData(width, height, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
                 new RGB(0, 150, 0), new RGB(255, 0, 0) }));
 
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
@@ -144,7 +144,7 @@ public class NeuralDialog {
         Map<Integer, List<Double>> results = new HashMap<>();
         IntStream.range(0, number).forEach(index-> {
             Display.getCurrent().asyncExec(() -> {
-                List<Double> result = neuralNetwork.calculate(getInput(null, index, index, -1), null).stream().findFirst().orElse(null);
+                List<Double> result = neuralNetwork.calculate(Utils.getInput(gc, image.getImageData(), null, index, index, -1), null).stream().findFirst().orElse(null);
                 results.put(index, result);
 
                 int gotIndex = Utils.getBestIndex(result);
@@ -153,13 +153,13 @@ public class NeuralDialog {
                 boolean correct = gotLetter.equals(shouldLetter);
                 if (correct) count.getAndDecrement();
 
-                getInput(imageData, gotIndex, index, correct?2:3);
+                Utils.getInput(gc, image.getImageData(), imageDataWrite, gotIndex, index, correct?2:3);
                 scan.set(scan.get()+gotLetter);
                 if (scan.get().replaceAll("\n", "").length()%COLUMNS == 0) {
                     scan.set(scan.get()+"\n");
                 }
 
-                middleLabel.setImage(new Image(shell.getDisplay(), imageData));
+                middleLabel.setImage(new Image(shell.getDisplay(), imageDataWrite));
                 shell.layout();
 
                 if (index == number -1) {
@@ -167,7 +167,7 @@ public class NeuralDialog {
                     textImage.setText(scan.get()+"\n"+detected+" of "+text.length()+" characters were properly detected ("+(detected*100/text.length())+"%)");
 
                     ImageLoader saver = new ImageLoader();
-                    saver.data = new ImageData[] { imageData };
+                    saver.data = new ImageData[] { imageDataWrite };
                     saver.save(FILE_NAME_OUTPUT, SWT.IMAGE_PNG);
 
                     System.out.printf("=============== Network Run took: %s\n", Utils.getTimeElapsed(new Date().getTime()-startDate.getTime()));
@@ -192,50 +192,14 @@ public class NeuralDialog {
             public void mouseUp(MouseEvent e) {
                 if (e.button == 1) {
                     int index = (COLUMNS*(e.y/gc.getFontMetrics().getHeight()))+e.x/gc.getFontMetrics().getAverageCharWidth();
-                    NeuralCorrectionDialog neuralCorrectionDialog = new NeuralCorrectionDialog(shell, fontSize, results.get(index), index);
+                    String shouldLetter = String.valueOf(text.charAt(index));
+                    NeuralCorrectionDialog neuralCorrectionDialog = new NeuralCorrectionDialog(shell, fontSize, results.get(index), index, image, shouldLetter);
                     neuralCorrectionDialog.open();
                 }
             }
         };
 
         middleLabel.addMouseListener(mouseListener);
-    }
-
-    private List<Double> getInput(ImageData imageData, int indexRead, int indexWrite, int pixelToSet){
-        int frameX = gc.getFontMetrics().getAverageCharWidth();
-        int frameY = gc.getFontMetrics().getHeight();
-        int shiftFrameX = image.getImageData().width/frameX;
-
-        int shiftReadY = frameY*(indexRead / shiftFrameX);
-        int shiftReadX = indexRead % shiftFrameX;
-
-        int shiftWriteY = frameY*(indexWrite / shiftFrameX);
-        int shiftWriteX = indexWrite % shiftFrameX;
-
-        List<Double> input = new ArrayList<>();
-        IntStream.range(0, frameX).forEach(x->{
-            IntStream.range(0, frameY).forEach(y->{
-                int readX = shiftReadX*frameX + x;
-                int readY = shiftReadY+y;
-
-                int writeX = shiftWriteX*frameX + x;
-                int writeY = shiftWriteY+y;
-
-                int readValue = image.getImageData().getPixel(readX, readY);
-                if (imageData != null) {
-                    if (readValue == 1) {
-                        imageData.setPixel(writeX, writeY, pixelToSet);
-                    }
-
-                    if (x == 0 || y == 0) {
-                        imageData.setPixel(writeX, writeY, 1);
-                    }
-                }
-                input.add((double) readValue);
-            });
-        });
-
-        return input;
     }
 
     private String drawLeftImage(Label label){

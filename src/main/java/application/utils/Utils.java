@@ -2,8 +2,11 @@ package application.utils;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -59,5 +62,42 @@ public class Utils {
 
     public static int getBestIndex(List<Double> result){
         return IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
+    }
+
+    public static List<Double> getInput(GC gc, ImageData imageDataRead, ImageData imageDataWrite, int indexRead, int indexWrite, int pixelToSet){
+        int frameX = gc.getFontMetrics().getAverageCharWidth();
+        int frameY = gc.getFontMetrics().getHeight();
+        int shiftFrameX = imageDataRead.width/frameX;
+
+        int shiftReadY = frameY*(indexRead / shiftFrameX);
+        int shiftReadX = indexRead % shiftFrameX;
+
+        int shiftWriteY = frameY*(indexWrite / shiftFrameX);
+        int shiftWriteX = indexWrite % shiftFrameX;
+
+        List<Double> input = new ArrayList<>();
+        IntStream.range(0, frameX).forEach(x->{
+            IntStream.range(0, frameY).forEach(y->{
+                int readX = shiftReadX*frameX + x;
+                int readY = shiftReadY+y;
+
+                int writeX = shiftWriteX*frameX + x;
+                int writeY = shiftWriteY+y;
+
+                int readValue = imageDataRead.getPixel(readX, readY);
+                if (imageDataWrite != null) {
+                    if (readValue == 1) {
+                        imageDataWrite.setPixel(writeX, writeY, pixelToSet);
+                    }
+
+                    if (x == 0 || y == 0) {
+                        imageDataWrite.setPixel(writeX, writeY, 1);
+                    }
+                }
+                input.add((double) readValue);
+            });
+        });
+
+        return input;
     }
 }
