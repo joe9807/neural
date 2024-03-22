@@ -26,11 +26,13 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,6 +60,7 @@ public class NeuralDialog {
     private int width;
     private int height;
     private int fontSize;
+    private Set<Integer> wrongIndices;
 
     @Autowired
     private NeuralNetwork neuralNetwork;
@@ -80,7 +83,6 @@ public class NeuralDialog {
         textImage = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
         textImage.setLayoutData(new RowData(width, height));
         text = drawLeftImage(leftLabel);
-        neuralNetwork.setLearnText(ALPHABET);
         neuralNetwork.initParameters(gc.getFontMetrics().getAverageCharWidth()*gc.getFontMetrics().getHeight(), ALPHABET.length());
 
         setMenu(leftLabel);
@@ -100,7 +102,7 @@ public class NeuralDialog {
         createItem.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork, getInputs());
+                NeuralNetworkDialog neuralNetworkDialog = new NeuralNetworkDialog(shell, neuralNetwork, getInputs(), getWrongInputs(), getWrongText());
                 switch (neuralNetworkDialog.open()){
                     case 1: return;
                     case 2: {
@@ -116,7 +118,7 @@ public class NeuralDialog {
                         return;
                     }
                     case 5: {
-                        run(text);
+                        wrongIndices = run();
                     }
                 }
             }
@@ -132,7 +134,16 @@ public class NeuralDialog {
         return IntStream.range(0, ALPHABET.length()).mapToObj(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).collect(Collectors.toList());
     }
 
-    public void run(String text){
+    public List<List<Double>> getWrongInputs(){
+        return Optional.ofNullable(wrongIndices).orElse(new HashSet<>()).stream().map(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).collect(Collectors.toList());
+    }
+
+    public String getWrongText(){
+        return Optional.ofNullable(wrongIndices).orElse(new HashSet<>()).stream().map(index-> String.valueOf(text.charAt(index))).collect(Collectors.joining());
+    }
+
+    public Set<Integer> run(){
+        Set<Integer> wrongIndices = new HashSet<>();
         Date startDate = new Date();
 
         ImageData imageDataWrite = new ImageData(width, height, 4, new PaletteData(new RGB[] {new RGB(255, 255, 255), new RGB(0, 0, 0),
@@ -151,7 +162,11 @@ public class NeuralDialog {
                 String gotLetter = String.valueOf(ALPHABET.charAt(gotIndex));
                 String shouldLetter = String.valueOf(text.charAt(index));
                 boolean correct = gotLetter.equals(shouldLetter);
-                if (correct) count.getAndDecrement();
+                if (correct) {
+                    count.getAndDecrement();
+                } else {
+                    wrongIndices.add(index);
+                }
 
                 Utils.getInput(gc, image.getImageData(), imageDataWrite, gotIndex, index, correct?2:3, true);
                 scan.set(scan.get()+gotLetter);
@@ -200,6 +215,8 @@ public class NeuralDialog {
         };
 
         middleLabel.addMouseListener(mouseListener);
+
+        return wrongIndices;
     }
 
     private String drawLeftImage(Label label){

@@ -13,6 +13,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 
 import java.util.Date;
@@ -27,7 +28,7 @@ public class NeuralLearningControl {
     private final NeuralNetwork neuralNetwork;
     private Date startDate;
     private Button learnButton;
-    private final List<List<Double>> inputs;
+    private List<List<Double>> inputs;
     private final Runnable updateLabel;
     private String elapsedString;
 
@@ -72,6 +73,8 @@ public class NeuralLearningControl {
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
+
+        new Label(parent, SWT.NONE).setText(neuralNetwork.getLearnText());
     }
 
     public void learn(){
@@ -97,8 +100,8 @@ public class NeuralLearningControl {
     }
 
     private List<List<Double>> getDeltas(String learnText){
-        return IntStream.range(0, inputs.size()).mapToObj(learnIndex-> IntStream.range(0, NeuralConstants.ALPHABET.length())
-                .mapToObj(alphabetIndex-> learnText.charAt(learnIndex) == NeuralConstants.ALPHABET.charAt(alphabetIndex)?1.0:0.0)
+        return IntStream.range(0, learnText.length()).mapToObj(learnTextIndex-> IntStream.range(0, NeuralConstants.ALPHABET.length())
+                .mapToObj(index-> learnText.charAt(learnTextIndex) == NeuralConstants.ALPHABET.charAt(index)?1.0:0.0)
                 .collect(Collectors.toList())).collect(Collectors.toList());
     }
 
@@ -122,9 +125,13 @@ public class NeuralLearningControl {
     public void stop(){
         learnButton.setText("Learn");
         neuralNetwork.saveWeights();
-        elapsedString = "Network has learned. Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
+        elapsedString = "Learned on "+ inputs.size()+" sample(s). Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
         System.out.println(elapsedString);
         updateLabel.run();
         progressBarEpoch.redraw();
+    }
+
+    public void setInputs(List<List<Double>> inputs) {
+        this.inputs = inputs;
     }
 }

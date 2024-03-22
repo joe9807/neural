@@ -13,6 +13,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -25,17 +26,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static application.neural.NeuralConstants.ALPHABET;
+
 public class NeuralNetworkDialog extends Dialog {
     private static final int WEIGHT = 520;
-    private static final int HEIGHT = 350;
+    private static final int HEIGHT = 400;
+
     private final NeuralNetwork neuralNetwork;
     private final List<List<Double>> inputs;
+    private final List<List<Double>> wrongInputs;
+    private String wrongText;
     private Label labelError;
+    private Button includeWrongInputs;
+    private NeuralLearningControl neuralLearningControl;
 
-    protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, List<List<Double>> inputs) {
+    protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, List<List<Double>> inputs, List<List<Double>> wrongInputs, String wrongText) {
         super(parentShell);
         this.neuralNetwork = neuralNetwork;
         this.inputs = inputs;
+        this.wrongInputs = wrongInputs;
+        this.wrongText = wrongText;
     }
 
     @Override
@@ -78,6 +88,18 @@ public class NeuralNetworkDialog extends Dialog {
         mText.setText(String.valueOf(neuralNetwork.getParameters().getM()));
         mText.addModifyListener(e -> neuralNetwork.getParameters().setM(((Text)e.widget).getText()));
 
+        new Label(composite, SWT.NONE).setText("Include Wrong Inputs:");
+        includeWrongInputs = new Button(composite, SWT.CHECK);
+        includeWrongInputs.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                changeInputs();
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {}
+        });
+
         labelError = new Label(composite, SWT.BORDER);
         labelError.setLayoutData(new GridData(GridData.FILL_BOTH));
         ((GridData)labelError.getLayoutData()).horizontalSpan=columnsNumber;
@@ -90,9 +112,21 @@ public class NeuralNetworkDialog extends Dialog {
         learningComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         ((GridData)learningComposite.getLayoutData()).horizontalSpan=columnsNumber;
 
-        NeuralLearningControl learningControl = new NeuralLearningControl(neuralNetwork, inputs, this::drawErrors);
-        learningControl.draw(learningComposite);
+        neuralNetwork.setLearnText(ALPHABET);
+        neuralLearningControl = new NeuralLearningControl(neuralNetwork, inputs, this::drawErrors);
+        neuralLearningControl.draw(learningComposite);
         return composite;
+    }
+
+    private void changeInputs(){
+        List<List<Double>> result = new ArrayList<>(inputs);
+        neuralNetwork.setLearnText(ALPHABET);
+
+        if (includeWrongInputs.getSelection()){
+            result.addAll(wrongInputs);
+            neuralNetwork.setLearnText(ALPHABET+wrongText);
+        }
+        neuralLearningControl.setInputs(result);
     }
 
     public void drawErrors(){
