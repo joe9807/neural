@@ -26,6 +26,7 @@ public class NeuralLearningControl {
     private int progressSamples;
     private int progressEpoches;
     private final NeuralNetwork neuralNetwork;
+    private Label learnTextLabel;
     private Date startDate;
     private Button learnButton;
     private List<List<Double>> inputs;
@@ -74,7 +75,8 @@ public class NeuralLearningControl {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        new Label(parent, SWT.NONE).setText(neuralNetwork.getLearnText());
+        learnTextLabel = new Label(parent, SWT.NONE);
+        learnTextLabel.setText(neuralNetwork.getLearnText());
     }
 
     public void learn(){
@@ -133,5 +135,11 @@ public class NeuralLearningControl {
 
     public void setInputs(List<List<Double>> inputs) {
         this.inputs = inputs;
+    }
+
+    public void redraw(){
+        learnTextLabel.setText(neuralNetwork.getLearnText());
+        learnTextLabel.pack();
+        learnTextLabel.redraw();
     }
 }

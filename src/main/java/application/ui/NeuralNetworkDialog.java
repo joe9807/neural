@@ -127,6 +127,7 @@ public class NeuralNetworkDialog extends Dialog {
             neuralNetwork.setLearnText(ALPHABET+wrongText);
         }
         neuralLearningControl.setInputs(result);
+        neuralLearningControl.redraw();
     }
 
     public void drawErrors(){
