@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +23,7 @@ import static application.neural.NeuralConstants.ALPHABET;
 import static application.neural.NeuralConstants.COLUMNS;
 
 public class NeuralCorrectionDialog extends Dialog {
+    private static final int SCALE = 10;
     private final int fontSize;
     private final List<Double> result;
     private final int index;
@@ -53,7 +56,7 @@ public class NeuralCorrectionDialog extends Dialog {
     private void drawLeftImage(Composite composite, Label label){
         GC gc = new GC(composite.getDisplay());
         gc.setFont(Utils.getFont(composite.getDisplay(), fontSize));
-        int width = gc.getFontMetrics().getAverageCharWidth()*55;
+        int width = gc.getFontMetrics().getAverageCharWidth()*(SCALE+10)*2;
         int height = COLUMNS*gc.getFontMetrics().getHeight();
 
         Image image = new Image(composite.getDisplay(), width-50, height);
@@ -76,7 +79,7 @@ public class NeuralCorrectionDialog extends Dialog {
             }
             int x = pos/COLUMNS;
             int y = pos%COLUMNS;
-            gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).toPlainString()), x*width/2, gcImage.getFontMetrics().getHeight()*y);
+            gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).setScale(SCALE, RoundingMode.HALF_UP).toPlainString()), x*width/2, gcImage.getFontMetrics().getHeight()*y);
             cloneResult.set(index, -1d);
         });
 
