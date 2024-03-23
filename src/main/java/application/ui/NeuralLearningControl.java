@@ -33,9 +33,8 @@ public class NeuralLearningControl {
     private final Runnable updateLabel;
     private String elapsedString;
 
-    protected NeuralLearningControl(NeuralNetwork neuralNetwork, List<List<Double>> inputs, Runnable updateLabel) {
+    protected NeuralLearningControl(NeuralNetwork neuralNetwork, Runnable updateLabel) {
         this.neuralNetwork = neuralNetwork;
-        this.inputs = inputs;
         this.updateLabel = updateLabel;
     }
 
@@ -76,7 +75,9 @@ public class NeuralLearningControl {
         });
 
         learnTextLabel = new Label(parent, SWT.NONE);
-        learnTextLabel.setText(neuralNetwork.getLearnText());
+        if (neuralNetwork.getLearnText() != null) {
+            learnTextLabel.setText(neuralNetwork.getLearnText());
+        }
     }
 
     public void learn(){

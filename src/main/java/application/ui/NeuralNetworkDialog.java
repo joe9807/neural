@@ -13,7 +13,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -31,13 +30,16 @@ import static application.neural.NeuralConstants.ALPHABET;
 public class NeuralNetworkDialog extends Dialog {
     private static final int WEIGHT = 520;
     private static final int HEIGHT = 400;
+    private static final String onlyInitialInputs = "Only Initial Inputs";
+    private static final String onlyWrongInputs = "Only Wrong Inputs";
+    private static final String plusWrongInputs = "Plus Wrong Inputs";
 
     private final NeuralNetwork neuralNetwork;
     private final List<List<Double>> inputs;
     private final List<List<Double>> wrongInputs;
-    private String wrongText;
+    private final String wrongText;
     private Label labelError;
-    private Button includeWrongInputs;
+    private Combo comboInputs;
     private NeuralLearningControl neuralLearningControl;
 
     protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, List<List<Double>> inputs, List<List<Double>> wrongInputs, String wrongText) {
@@ -89,8 +91,12 @@ public class NeuralNetworkDialog extends Dialog {
         mText.addModifyListener(e -> neuralNetwork.getParameters().setM(((Text)e.widget).getText()));
 
         new Label(composite, SWT.NONE).setText("Include Wrong Inputs:");
-        includeWrongInputs = new Button(composite, SWT.CHECK);
-        includeWrongInputs.addSelectionListener(new SelectionListener() {
+        comboInputs = new Combo(composite, SWT.CHECK | SWT.READ_ONLY);
+        comboInputs.add(onlyInitialInputs);
+        comboInputs.add(onlyWrongInputs);
+        comboInputs.add(plusWrongInputs);
+        comboInputs.select(0);
+        comboInputs.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 changeInputs();
@@ -112,21 +118,27 @@ public class NeuralNetworkDialog extends Dialog {
         learningComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         ((GridData)learningComposite.getLayoutData()).horizontalSpan=columnsNumber;
 
-        neuralNetwork.setLearnText(ALPHABET);
-        neuralLearningControl = new NeuralLearningControl(neuralNetwork, inputs, this::drawErrors);
+        neuralLearningControl = new NeuralLearningControl(neuralNetwork, this::drawErrors);
         neuralLearningControl.draw(learningComposite);
+        changeInputs();
         return composite;
     }
 
     private void changeInputs(){
-        List<List<Double>> result = new ArrayList<>(inputs);
-        neuralNetwork.setLearnText(ALPHABET);
-
-        if (includeWrongInputs.getSelection()){
+        if (comboInputs.getText().equalsIgnoreCase(onlyInitialInputs)){
+            neuralLearningControl.setInputs(inputs);
+            neuralNetwork.setLearnText(ALPHABET);
+        } else if (comboInputs.getText().equalsIgnoreCase(onlyWrongInputs)){
+            neuralLearningControl.setInputs(wrongInputs);
+            neuralNetwork.setLearnText(wrongText);
+        } else if (comboInputs.getText().equalsIgnoreCase(plusWrongInputs)){
+            List<List<Double>> result = new ArrayList<>();
+            result.addAll(inputs);
             result.addAll(wrongInputs);
+            neuralLearningControl.setInputs(result);
             neuralNetwork.setLearnText(ALPHABET+wrongText);
         }
-        neuralLearningControl.setInputs(result);
+
         neuralLearningControl.redraw();
     }
 
