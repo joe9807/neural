@@ -53,6 +53,7 @@ public class NeuralDialog {
     private GC gc;
     private Image image;
     private Label middleLabel;
+    private Label leftLabel;
     private MouseListener mouseListener;
     private Text textImage;
     private String text;
@@ -78,7 +79,7 @@ public class NeuralDialog {
         shell.setText("Neural Network");
         shell.setSize(new Point(width *3+50, height +50));
 
-        Label leftLabel = new Label(shell, SWT.BORDER);
+        leftLabel = new Label(shell, SWT.BORDER);
         middleLabel = new Label(shell, SWT.BORDER);
         textImage = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
         textImage.setLayoutData(new RowData(width, height));
@@ -192,6 +193,7 @@ public class NeuralDialog {
 
         if (mouseListener != null) {
             middleLabel.removeMouseListener(mouseListener);
+            leftLabel.removeMouseListener(mouseListener);
         }
 
         mouseListener = new MouseListener() {
@@ -215,6 +217,7 @@ public class NeuralDialog {
         };
 
         middleLabel.addMouseListener(mouseListener);
+        leftLabel.addMouseListener(mouseListener);
 
         return wrongIndices;
     }
