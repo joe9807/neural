@@ -86,6 +86,7 @@ public class NeuralCorrectionDialog extends Dialog {
         gcImage.dispose();
         final ImageData id = image.getImageData();
         Utils.getInput(gc, Objects.requireNonNull(leftImage.getImageData()), id, index, 1, 1, false);
+        gc.dispose();
 
         label.setImage(new Image(composite.getDisplay(), id));
     }
