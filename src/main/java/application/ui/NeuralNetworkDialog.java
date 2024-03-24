@@ -90,7 +90,7 @@ public class NeuralNetworkDialog extends Dialog {
         mText.setText(String.valueOf(neuralNetwork.getParameters().getM()));
         mText.addModifyListener(e -> neuralNetwork.getParameters().setM(((Text)e.widget).getText()));
 
-        new Label(composite, SWT.NONE).setText("Include Wrong Inputs:");
+        new Label(composite, SWT.NONE).setText("Inputs:");
         comboInputs = new Combo(composite, SWT.CHECK | SWT.READ_ONLY);
         comboInputs.add(onlyInitialInputs);
         comboInputs.add(onlyWrongInputs);
