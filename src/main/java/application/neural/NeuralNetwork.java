@@ -40,6 +40,7 @@ public class NeuralNetwork {
     public void recreate(){
         resetErrors();
         neuralRepository.deleteCurrent();
+        parameters.setTotalEpoches(0);
 
         final AtomicInteger prevCount = new AtomicInteger(0);
         final AtomicInteger levelNumber = new AtomicInteger(0);
@@ -58,6 +59,10 @@ public class NeuralNetwork {
             prevCount.set(neuronCount);
             levelNumber.incrementAndGet();
         });
+    }
+
+    public void increaseEpoches(){
+        parameters.setTotalEpoches(parameters.getTotalEpoches()+Integer.parseInt(parameters.getEpochesNumber()));
     }
 
     public void saveWeights() {

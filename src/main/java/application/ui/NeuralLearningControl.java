@@ -128,6 +128,7 @@ public class NeuralLearningControl {
     public void stop(){
         learnButton.setText("Learn");
         neuralNetwork.saveWeights();
+        neuralNetwork.increaseEpoches();
         elapsedString = "Learned on "+ inputs.size()+" sample(s). Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
         System.out.println(elapsedString);
         updateLabel.run();

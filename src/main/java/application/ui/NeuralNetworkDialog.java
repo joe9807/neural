@@ -84,11 +84,10 @@ public class NeuralNetworkDialog extends Dialog {
         epochesText.setText(String.valueOf(neuralNetwork.getParameters().getEpochesNumber()));
         epochesText.addModifyListener(e -> neuralNetwork.getParameters().setEpochesNumber(((Text)e.widget).getText()));
 
-        new Label(composite, SWT.NONE).setText("M:");
-        Text mText = new Text(composite, SWT.BORDER);
-        mText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        mText.setText(String.valueOf(neuralNetwork.getParameters().getM()));
-        mText.addModifyListener(e -> neuralNetwork.getParameters().setM(((Text)e.widget).getText()));
+        new Label(composite, SWT.NONE).setText("Total Epoches:");
+        Text totalEpoches = new Text(composite, SWT.BORDER | SWT.READ_ONLY);
+        totalEpoches.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        totalEpoches.setText(String.valueOf(neuralNetwork.getParameters().getTotalEpoches()));
 
         new Label(composite, SWT.NONE).setText("Inputs:");
         comboInputs = new Combo(composite, SWT.CHECK | SWT.READ_ONLY);
@@ -105,6 +104,12 @@ public class NeuralNetworkDialog extends Dialog {
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
+
+        new Label(composite, SWT.NONE).setText("M:");
+        Text mText = new Text(composite, SWT.BORDER);
+        mText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        mText.setText(String.valueOf(neuralNetwork.getParameters().getM()));
+        mText.addModifyListener(e -> neuralNetwork.getParameters().setM(((Text)e.widget).getText()));
 
         labelError = new Label(composite, SWT.BORDER);
         labelError.setLayoutData(new GridData(GridData.FILL_BOTH));
