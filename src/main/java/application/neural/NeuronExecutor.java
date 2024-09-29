@@ -38,9 +38,7 @@ public class NeuronExecutor {
     }
 
     public void calculateWeights(int level, List<Double> input, List<Double> delta, double m){
-        Future<?> future = executor.submit(new NeuronWeightWorker(neuralRepository.findAllByLevel(level), input, delta, m));
-
-        while (!future.isDone());
+        neuralRepository.findAllByLevel(level).forEach(weight-> weight.setValue(weight.getValue() + m * input.get(weight.getBackNumber()) * delta.get(weight.getNumber())));
     }
 
     public List<Double> calculateLevel(int level, List<Double> input, List<Double> values){
