@@ -8,13 +8,13 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class Neuron {
-    private List<Double> weights;
-    private List<Double> input;
+    private double[] weights;
+    private double[] input;
     private int number;
     private Double output = null;
     private Double value = null;
 
-    public Neuron(int number, List<Double> weights, List<Double> input, Double value){
+    public Neuron(int number, double[] weights, double[] input, Double value){
         this.number = number;
         this.weights = weights;
         this.input = input;

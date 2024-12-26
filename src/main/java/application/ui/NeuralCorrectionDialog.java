@@ -12,10 +12,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -25,12 +22,12 @@ import static application.neural.NeuralConstants.COLUMNS;
 public class NeuralCorrectionDialog extends Dialog {
     private static final int SCALE = 10;
     private final int fontSize;
-    private final List<Double> result;
+    private final double[] result;
     private final int index;
     private final Image leftImage;
     private final String shouldLetter;
 
-    protected NeuralCorrectionDialog(Shell parentShell, int fontSize, List<Double> result, int index, Image leftImage, String shouldLetter) {
+    protected NeuralCorrectionDialog(Shell parentShell, int fontSize, double[] result, int index, Image leftImage, String shouldLetter) {
         super(parentShell);
         this.fontSize = fontSize;
         this.result = result;
@@ -63,24 +60,23 @@ public class NeuralCorrectionDialog extends Dialog {
         GC gcImage = new GC(image);
         gcImage.setFont(gc.getFont());
 
-        List<Double> cloneResult = new ArrayList<>(result);
-        IntStream.range(0, result.size()).forEach(pos->{
-            int index = Utils.getBestIndex(cloneResult);
-            String result = String.valueOf(ALPHABET.charAt(index));
+        IntStream.range(0, result.length).forEach(pos->{
+            int index = Utils.getBestIndex(result);
+            String ch = String.valueOf(ALPHABET.charAt(index));
 
             gcImage.setForeground(composite.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 
-            if (result.equals(shouldLetter)){
+            if (ch.equals(shouldLetter)){
                 gcImage.setForeground(composite.getDisplay().getSystemColor(SWT.COLOR_GREEN));
             }
 
-            if (pos == 0 && !result.equals(shouldLetter)) {
+            if (pos == 0 && !ch.equals(shouldLetter)) {
                 gcImage.setForeground(composite.getDisplay().getSystemColor(SWT.COLOR_RED));
             }
             int x = pos/COLUMNS;
             int y = pos%COLUMNS;
-            gcImage.drawString(String.format("%s (%s)", result, BigDecimal.valueOf(cloneResult.get(index)).setScale(SCALE, RoundingMode.HALF_UP).toPlainString()), x*width/2, gcImage.getFontMetrics().getHeight()*y);
-            cloneResult.set(index, -1d);
+            gcImage.drawString(String.format("%s (%s)", ch, BigDecimal.valueOf(result[index]).setScale(SCALE, RoundingMode.HALF_UP).toPlainString()), x*width/2, gcImage.getFontMetrics().getHeight()*y);
+            result[index] = -1d;
         });
 
         gcImage.dispose();

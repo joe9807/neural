@@ -90,16 +90,20 @@ public class NeuralNetwork {
         return neuralRepository.getAllNames();
     }
 
-    public List<List<Double>> calculate(List<Double> input, List<Double> delta){
-        List<List<Double>> outputs = new ArrayList<>();
-        List<Double> output;
-        while ((output = neuronExecutor.calculateLevel(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)).size() != 0) {
+    public double[][] calculate(double[] input, double[] delta){
+        List<double[]> outputs = new ArrayList<>();
+        double[] output;
+        while ((output = neuronExecutor.calculateLevel(outputs.size(), outputs.stream().findFirst().orElse(input == null?loadInput():input), null)).length != 0) {
             outputs.add(0, output);
         }
 
-        if (delta == null) return outputs;
+        if (delta == null) {
+            double[][] arr = new double[outputs.size()][];
+            Arrays.setAll(arr, outputs::get);
+            return arr;
+        }
 
-        List<List<Double>> deltas = new ArrayList<>();
+        List<double[]> deltas = new ArrayList<>();
         while (outputs.size()-deltas.size()>1) {
             deltas.add(0, neuronExecutor.calculateLevel(outputs.size()-deltas.size(), deltas.stream().findFirst().orElse(delta), outputs.get(deltas.size())));
         }
@@ -110,7 +114,9 @@ public class NeuralNetwork {
         }
 
         errorsS.add(calculateError(outputs.get(0), delta));
-        return deltas;
+        double[][] arr = new double[deltas.size()][];
+        Arrays.setAll(arr, deltas::get);
+        return arr;
     }
 
     public void calculateErrors(int sampleNumber){
@@ -118,11 +124,11 @@ public class NeuralNetwork {
         errorsS = new ArrayList<>();
     }
 
-    private double calculateError(List<Double> output, List<Double> delta){
+    private Double calculateError(double[] output, double[] delta){
         int index = 0;
         double error = 0;
-        while (index != output.size() || index != delta.size()) {
-            double d = output.get(index)-delta.get(index);
+        while (index != output.length || index != delta.length) {
+            double d = output[index]-delta[index];
             error+=d*d;
             index++;
         }
@@ -131,20 +137,20 @@ public class NeuralNetwork {
     }
 
     public void generateInput() {
-        saveInput(IntStream.range(0, neuralRepository.findAllByLevel(0).size()).mapToObj(id -> Math.random()).collect(Collectors.toList()));
+        saveInput(IntStream.range(0, neuralRepository.findAllByLevel(0).size()).mapToDouble(id -> Math.random()).toArray());
     }
 
-    private void saveInput(List<Double> input) {
+    private void saveInput(double[] input) {
         try {
-            Files.writeString(Path.of(getClass().getResource("/input.txt").toURI()), input.stream().map(String::valueOf).collect(Collectors.joining("\n")), StandardOpenOption.CREATE);
+            Files.writeString(Path.of(getClass().getResource("/input.txt").toURI()), Arrays.stream(input).mapToObj(String::valueOf).collect(Collectors.joining("\n")), StandardOpenOption.CREATE);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private List<Double> loadInput() {
+    private double[] loadInput() {
         try {
-            return Files.readAllLines(Path.of(getClass().getResource("/input.txt").toURI())).stream().map(Double::valueOf).collect(Collectors.toList());
+            return Files.readAllLines(Path.of(getClass().getResource("/input.txt").toURI())).stream().mapToDouble(Double::valueOf).toArray();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -154,8 +160,12 @@ public class NeuralNetwork {
         return parameters;
     }
 
-    public List<Double> getErrors() {
-        return errors;
+    public double[] getErrors() {
+        if (errors == null) return null;
+
+        double[] arr = new double[errors.size()];
+        Arrays.setAll(arr, errors::get);
+        return arr;
     }
 
 

@@ -7,6 +7,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -48,11 +49,11 @@ public class Utils {
         return result.isEmpty()?"0 ms":result;
     }
 
-    public static void printLevel(List<Double> level){
+    public static void printLevel(double[] level){
         if (level == null) return;
 
-        for (int i=0;i<level.size();i++){
-            System.out.printf("neuron number %-3s: %s%n", i, level.get(i));
+        for (int i=0;i<level.length;i++){
+            System.out.printf("neuron number %-3s: %s%n", i, level[i]);
         }
     }
 
@@ -60,11 +61,11 @@ public class Utils {
         return new Font(display, "Courier", fontSize, SWT.NORMAL);
     }
 
-    public static int getBestIndex(List<Double> result){
-        return IntStream.range(0, result.size()).reduce((i, j) -> result.get(i) > result.get(j) ? i : j).getAsInt();
+    public static int getBestIndex(double[] result){
+        return IntStream.range(0, result.length).reduce((i, j) -> result[i] > result[j] ? i : j).getAsInt();
     }
 
-    public static List<Double> getInput(GC gc, ImageData imageDataRead, ImageData imageDataWrite, int indexRead, int indexWrite, int pixelToSet, boolean drawBorder){
+    public static double[] getInput(GC gc, ImageData imageDataRead, ImageData imageDataWrite, int indexRead, int indexWrite, int pixelToSet, boolean drawBorder){
         int frameX = gc.getFontMetrics().getAverageCharWidth();
         int frameY = gc.getFontMetrics().getHeight();
         int shiftFrameX = imageDataRead.width/frameX;
@@ -98,6 +99,43 @@ public class Utils {
             });
         });
 
-        return input;
+        double[] arr = new double[input.size()];
+        Arrays.setAll(arr, input::get);
+        return arr;
+    }
+
+    public static double min(double[] array){
+        double minValue = 0.0;
+
+        for (double v : array) {
+            if (v < minValue) {
+                minValue = v;
+            }
+        }
+
+        return minValue;
+    }
+
+    public static double max(double[] array){
+        double maxValue = 0.0;
+
+        for (double v : array) {
+            if (v > maxValue) {
+                maxValue = v;
+            }
+        }
+
+        return maxValue;
+    }
+
+    public static double[][] concatenateArrays(double[][] firstArray, double[][] secondArray) {
+        int firstArrayLength = firstArray.length;
+        int secondArrayLength = secondArray.length;
+        double[][] result = new double[firstArrayLength + secondArrayLength][];
+
+        System.arraycopy(firstArray, 0, result, 0, firstArrayLength);
+        System.arraycopy(secondArray, 0, result, firstArrayLength, secondArrayLength);
+
+        return result;
     }
 }

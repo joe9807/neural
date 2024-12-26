@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 public class NeuronExecutor {
@@ -23,33 +21,36 @@ public class NeuronExecutor {
     @Autowired
     private NeuralRepository neuralRepository;
 
-    protected List<List<Double>> getMatrix(int level, boolean back) {
-        List<List<Double>> result = new ArrayList<>();
+    protected double[][] getMatrix(int level, boolean back) {
+        List<double[]> result = new ArrayList<>();
         final AtomicInteger number = new AtomicInteger();
 
-        List<Double> neuronWeights;
+        double[] neuronWeights;
         while ((neuronWeights = neuralRepository.findAllByLevel(level).stream()
                 .filter(back? weight->weight.getBackNumber() == number.get():weight->weight.getNumber() == number.get())
-                .sorted().map(Weight::getValue).collect(Collectors.toList())).size() !=0) {
+                .sorted().mapToDouble(Weight::getValue).toArray()).length !=0) {
             result.add(neuronWeights);
             number.getAndIncrement();
         }
-        return result;
+
+        double[][] arr = new double[result.size()][];
+        Arrays.setAll(arr, result::get);
+        return arr;
     }
 
-    public void calculateWeights(int level, List<Double> input, List<Double> delta, double m){
-        neuralRepository.findAllByLevel(level).forEach(weight-> weight.setValue(weight.getValue() + m * input.get(weight.getBackNumber()) * delta.get(weight.getNumber())));
+    public void calculateWeights(int level, double[] input, double[] delta, double m){
+        neuralRepository.findAllByLevel(level).forEach(weight-> weight.setValue(weight.getValue() + m * input[weight.getBackNumber()] * delta[weight.getNumber()]));
     }
 
-    public List<Double> calculateLevel(int level, List<Double> input, List<Double> values){
+    public double[] calculateLevel(int level, double[] input, double[] values){
         if (level == 0) return input;
 
         final List<Neuron> neurons = new ArrayList<>();
         final List<Double> singleResult = new ArrayList<>();
 
-        List<List<Double>> matrix = getMatrix(level, values != null);
-        int count = values != null?values.size():matrix.size();
-        final Double[] result = new Double[count];
+        double[][] matrix = getMatrix(level, values != null);
+        int count = values != null?values.length:matrix.length;
+        final double[] result = new double[count];
 
         for (int number=0;number<count;number++) {
             Neuron neuron = NeuronFactory.getNeuron(number, matrix, input, values);
@@ -63,7 +64,9 @@ public class NeuronExecutor {
         }
 
         if (single) {
-            return singleResult;
+            double[] arr = new double[singleResult.size()];
+            Arrays.setAll(arr, singleResult::get);
+            return arr;
         }
 
         while (neurons.size() != 0) {
@@ -78,6 +81,6 @@ public class NeuronExecutor {
 
             neurons.removeAll(temp);
         }
-        return Arrays.asList(result);
+        return result;
     }
 }

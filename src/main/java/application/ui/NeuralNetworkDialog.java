@@ -35,14 +35,14 @@ public class NeuralNetworkDialog extends Dialog {
     private static final String plusWrongInputs = "Plus Wrong Inputs";
 
     private final NeuralNetwork neuralNetwork;
-    private final List<List<Double>> inputs;
-    private final List<List<Double>> wrongInputs;
+    private final double[][] inputs;
+    private final double[][] wrongInputs;
     private final String wrongText;
     private Label labelError;
     private Combo comboInputs;
     private NeuralLearningControl neuralLearningControl;
 
-    protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, List<List<Double>> inputs, List<List<Double>> wrongInputs, String wrongText) {
+    protected NeuralNetworkDialog(Shell parentShell, NeuralNetwork neuralNetwork, double[][] inputs, double[][] wrongInputs, String wrongText) {
         super(parentShell);
         this.neuralNetwork = neuralNetwork;
         this.inputs = inputs;
@@ -137,9 +137,7 @@ public class NeuralNetworkDialog extends Dialog {
             neuralLearningControl.setInputs(wrongInputs);
             neuralNetwork.setLearnText(wrongText);
         } else if (comboInputs.getText().equalsIgnoreCase(plusWrongInputs)){
-            List<List<Double>> result = new ArrayList<>();
-            result.addAll(inputs);
-            result.addAll(wrongInputs);
+            double[][] result = Utils.concatenateArrays(inputs, wrongInputs);
             neuralLearningControl.setInputs(result);
             neuralNetwork.setLearnText(ALPHABET+wrongText);
         }
@@ -154,11 +152,11 @@ public class NeuralNetworkDialog extends Dialog {
 
         IntStream.range(0, imageData.width).forEach(x-> imageData.setPixel(x, x *imageData.height/imageData.width, 2));
 
-        List<Double> errors = new ArrayList<>(neuralNetwork.getErrors());
+        double[] errors = neuralNetwork.getErrors();
 
-        double xScale = imageData.width/ (double) errors.size();
-        double min = errors.stream().min(Double::compareTo).orElse(0.0);
-        double max = errors.stream().max(Double::compareTo).orElse(1.0);
+        double xScale = imageData.width/ (double) errors.length;
+        double min = Utils.min(errors);
+        double max = Utils.max(errors);
         double yScale = (imageData.height-1)/(max-min);
 
         int index = 0;

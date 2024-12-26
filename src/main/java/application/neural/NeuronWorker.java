@@ -16,11 +16,11 @@ public class NeuronWorker implements Runnable {
     public void calculate(){
         double v = 0;
         if (neuron.getWeights() == null) {
-            v = neuron.getInput().get(neuron.getNumber())-neuron.getValue();
+            v = neuron.getInput()[neuron.getNumber()]-neuron.getValue();
         } else {
             int index = 0;
-            while (index != neuron.getWeights().size() || index != neuron.getInput().size()) {
-                v+=neuron.getWeights().get(index)*neuron.getInput().get(index);
+            while (index != neuron.getWeights().length || index != neuron.getInput().length) {
+                v+=neuron.getWeights()[index]*neuron.getInput()[index];
                 index++;
             }
         }

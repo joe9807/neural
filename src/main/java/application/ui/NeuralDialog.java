@@ -8,44 +8,21 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static application.neural.NeuralConstants.ALPHABET;
-import static application.neural.NeuralConstants.ALPHABET_LOWER_CASE;
-import static application.neural.NeuralConstants.ALPHABET_UPPER_CASE;
-import static application.neural.NeuralConstants.COLUMNS;
-import static application.neural.NeuralConstants.FILE_NAME_INPUT;
-import static application.neural.NeuralConstants.FILE_NAME_OUTPUT;
-import static application.neural.NeuralConstants.ROWS;
+import static application.neural.NeuralConstants.*;
 
 @Service
 public class NeuralDialog {
@@ -131,12 +108,12 @@ public class NeuralDialog {
         label.setMenu(menu);
     }
 
-    public List<List<Double>> getInputs(){
-        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).collect(Collectors.toList());
+    public double[][] getInputs(){
+        return IntStream.range(0, ALPHABET.length()).mapToObj(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).toArray(double[][]::new);
     }
 
-    public List<List<Double>> getWrongInputs(){
-        return Optional.ofNullable(wrongIndices).orElse(new HashSet<>()).stream().map(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).collect(Collectors.toList());
+    public double[][] getWrongInputs(){
+        return Optional.ofNullable(wrongIndices).orElse(new HashSet<>()).stream().map(index-> Utils.getInput(gc, image.getImageData(), null, index, index, -1, true)).toArray(double[][]::new);
     }
 
     public String getWrongText(){
@@ -153,10 +130,10 @@ public class NeuralDialog {
         final AtomicReference<String> scan = new AtomicReference<>(StringUtils.EMPTY);
         final AtomicInteger count = new AtomicInteger(text.length());
         int number = COLUMNS*ROWS;
-        Map<Integer, List<Double>> results = new HashMap<>();
+        Map<Integer, double[]> results = new HashMap<>();
         IntStream.range(0, number).forEach(index-> {
             Display.getCurrent().asyncExec(() -> {
-                List<Double> result = neuralNetwork.calculate(Utils.getInput(gc, image.getImageData(), null, index, index, -1, true), null).stream().findFirst().orElse(null);
+                double[] result = neuralNetwork.calculate(Utils.getInput(gc, image.getImageData(), null, index, index, -1, true), null)[0];
                 results.put(index, result);
 
                 int gotIndex = Utils.getBestIndex(result);
@@ -236,7 +213,7 @@ public class NeuralDialog {
             } else if (row == 1) {
                 result = ALPHABET_LOWER_CASE;
             } else {
-                result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52)) + "").collect(Collectors.joining());
+                result = IntStream.range(0, COLUMNS).mapToObj(index -> ALPHABET.charAt(ThreadLocalRandom.current().nextInt(0, 52))).map(String::valueOf).collect(Collectors.joining());
             }
             builder.append(result);
             gcImage.setForeground(gcImage.getDevice().getSystemColor(SWT.COLOR_BLACK));

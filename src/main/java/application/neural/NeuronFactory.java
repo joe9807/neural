@@ -1,9 +1,7 @@
 package application.neural;
 
-import java.util.List;
-
 public class NeuronFactory {
-    public static Neuron getNeuron(int number, List<List<Double>> matrix, List<Double> input, List<Double> values){
-        return new Neuron(number, matrix.size() == 0?null:matrix.get(number), input, values == null?null:values.get(number));
+    public static Neuron getNeuron(int number, double[][] matrix, double[] input, double[] values){
+        return new Neuron(number, matrix.length == 0?null:matrix[number], input, values == null?null:values[number]);
     }
 }

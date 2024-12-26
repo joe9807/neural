@@ -10,15 +10,9 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.*;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class NeuralLearningControl {
@@ -29,7 +23,7 @@ public class NeuralLearningControl {
     private Label learnTextLabel;
     private Date startDate;
     private Button learnButton;
-    private List<List<Double>> inputs;
+    private double[][] inputs;
     private final Runnable updateLabel;
     private String elapsedString;
 
@@ -88,13 +82,13 @@ public class NeuralLearningControl {
         progressEpoches = 0;
         neuralNetwork.resetErrors();
         progressBarEpoch.setMaximum(Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber()));
-        List<List<Double>> deltas = getDeltas(neuralNetwork.getLearnText());
+        double[][] deltas = getDeltas(neuralNetwork.getLearnText());
 
         IntStream.range(0, Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())).forEach(epoch->{
-            IntStream.range(0, inputs.size()).forEach(index-> {
+            IntStream.range(0, inputs.length).forEach(index-> {
                 Display.getCurrent().asyncExec(()->{
                     if (learnButton.getText().equalsIgnoreCase("Stop")) {
-                        neuralNetwork.calculate(inputs.get(index), deltas.get(index));
+                        neuralNetwork.calculate(inputs[index], deltas[index]);
                         step(neuralNetwork);
                     }
                 });
@@ -102,18 +96,18 @@ public class NeuralLearningControl {
         });
     }
 
-    private List<List<Double>> getDeltas(String learnText){
+    private double[][] getDeltas(String learnText){
         return IntStream.range(0, learnText.length()).mapToObj(learnTextIndex-> IntStream.range(0, NeuralConstants.ALPHABET.length())
-                .mapToObj(index-> learnText.charAt(learnTextIndex) == NeuralConstants.ALPHABET.charAt(index)?1.0:0.0)
-                .collect(Collectors.toList())).collect(Collectors.toList());
+                .mapToDouble(index-> learnText.charAt(learnTextIndex) == NeuralConstants.ALPHABET.charAt(index)?1.0:0.0)
+                .toArray()).toArray(double[][]::new);
     }
 
     public void step(NeuralNetwork neuralNetwork){
         progressSamples++;
 
-        if (progressSamples == inputs.size()) {
+        if (progressSamples == inputs.length) {
             progressEpoches++;
-            neuralNetwork.calculateErrors(inputs.size());
+            neuralNetwork.calculateErrors(inputs.length);
 
             if (progressEpoches == Integer.parseInt(neuralNetwork.getParameters().getEpochesNumber())) {
                 stop();
@@ -129,13 +123,13 @@ public class NeuralLearningControl {
         learnButton.setText("Learn");
         neuralNetwork.saveWeights();
         neuralNetwork.increaseEpoches();
-        elapsedString = "Learned on "+ inputs.size()+" sample(s). Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
+        elapsedString = "Learned on "+ inputs.length+" sample(s). Time elapsed: "+Utils.getTimeElapsed(new Date().getTime()-startDate.getTime());
         System.out.println(elapsedString);
         updateLabel.run();
         progressBarEpoch.redraw();
     }
 
-    public void setInputs(List<List<Double>> inputs) {
+    public void setInputs(double[][] inputs) {
         this.inputs = inputs;
     }
 
