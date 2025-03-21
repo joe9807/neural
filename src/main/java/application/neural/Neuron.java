@@ -24,4 +24,15 @@ public class Neuron {
     public Runnable getWorker(){
         return new NeuronWorker(this);
     }
+
+    public double calculate(){
+        double v = 0;
+        int index = 0;
+        while (index != getWeights().size() || index != getInput().size()) {
+            v+=getWeights().get(index)*getInput().get(index);
+            index++;
+        }
+
+        return v;
+    }
 }

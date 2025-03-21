@@ -18,11 +18,7 @@ public class NeuronWorker implements Runnable {
         if (neuron.getWeights() == null) {
             v = neuron.getInput().get(neuron.getNumber())-neuron.getValue();
         } else {
-            int index = 0;
-            while (index != neuron.getWeights().size() || index != neuron.getInput().size()) {
-                v+=neuron.getWeights().get(index)*neuron.getInput().get(index);
-                index++;
-            }
+            v = neuron.calculate();
         }
 
         if (neuron.getValue() == null) {
